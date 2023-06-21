@@ -6,6 +6,7 @@ from diagrams.generic.storage import Storage
 from diagrams.elastic.saas import Elastic
 from diagrams.onprem.network import Nginx
 
+
 with Diagram("movix-api", show=False, outformat="png"):
     client = Mobile("client")
     endpoints = Nginx("API gateway")
