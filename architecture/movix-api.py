@@ -1,11 +1,10 @@
-from diagrams import Diagram, Cluster, Edge
-from diagrams.generic.device import Mobile
-from diagrams.onprem.inmemory import Redis
-from diagrams.programming.framework import Fastapi
-from diagrams.generic.storage import Storage
+from diagrams import Cluster, Diagram, Edge
 from diagrams.elastic.saas import Elastic
+from diagrams.generic.device import Mobile
+from diagrams.generic.storage import Storage
+from diagrams.onprem.inmemory import Redis
 from diagrams.onprem.network import Nginx
-
+from diagrams.programming.framework import Fastapi
 
 with Diagram("movix-api", show=False, outformat="png"):
     client = Mobile("client")

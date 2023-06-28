@@ -1,16 +1,15 @@
 from multiprocessing import Process
+
+from utils import generate_csv_string, generate_random_data_for_csv, timing
 from vertica_python import Connection, connect
 
-from utils import generate_random_data_for_csv, timing, generate_csv_string
-
-
 connection_info = {
-            "host": "vertica",
-            "port": "5433",
-            "user": "dbadmin",
-            "database": "docker",
-            "autocommit": True
-        }
+    "host": "vertica",
+    "port": "5433",
+    "user": "dbadmin",
+    "database": "docker",
+    "autocommit": True,
+}
 
 
 class NO_DATA(Exception):
@@ -116,9 +115,11 @@ if __name__ == "__main__":
 # 2023-06-28 12:11:31 func:'check_write' took: 472.5615 sec
 # 2023-06-28 12:11:31 --Read--
 # 2023-06-28 12:11:31 Selected 10000000 rows
-# 2023-06-28 12:11:31 Sample Data: ['1698400264', '6350138181', '2329006959', '1997-01-21 15:24:22']
+# 2023-06-28 12:11:31 Sample Data:
+# ['1698400264', '6350138181', '2329006959', '1997-01-21 15:24:22']
 # 2023-06-28 12:11:31 func:'chech_read' took: 0.3870 sec
 # 2023-06-28 12:11:31 --Read And Write While Write--
 # 2023-06-28 12:11:32 Selected 10000000 rows
-# 2023-06-28 12:11:32 Sample Data: ['8497188662', '2435800366', '5013646629', '2015-12-13 04:44:03']
+# 2023-06-28 12:11:32 Sample Data:
+# ['8497188662', '2435800366', '5013646629', '2015-12-13 04:44:03']
 # 2023-06-28 12:11:32 func:'chech_read' took: 0.0625 sec
