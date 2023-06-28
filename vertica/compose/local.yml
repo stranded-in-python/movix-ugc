@@ -10,7 +10,7 @@ services:
 
   script:
     build:
-      context: ../vertica/
-      dockerfile: ../vertica/Dockerfile
+      context: ../
+      dockerfile: /Dockerfile
     depends_on:
       - vertica
