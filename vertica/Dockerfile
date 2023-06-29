@@ -53,8 +53,16 @@ COPY --from=python-build-stage /usr/src/app/wheels  /wheels/
 RUN pip install --no-cache-dir --no-index --find-links=/wheels/ /wheels/* \
 	&& rm -rf /wheels/
 
+COPY ./entrypoint.sh /entrypoint.sh
+RUN sed -i 's/\r$//g' /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+COPY ./start.sh /start.sh
+RUN sed -i 's/\r$//g' /start.sh
+RUN chmod +x /start.sh
+
 # copy application code to WORKDIR
 COPY ./src ${APP_HOME}
 # COPY ./pyproject.toml /pyproject.toml
 
-ENTRYPOINT ["python", "main.py"]
+ENTRYPOINT ["/entrypoint.sh"]
