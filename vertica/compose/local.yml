@@ -1,6 +1,6 @@
 version: "3.8"
 
-name: "vertiva benchmark"
+name: "vertica benchmark"
 
 services:
   vertica:
@@ -14,3 +14,4 @@ services:
       dockerfile: /Dockerfile
     depends_on:
       - vertica
+    command: "/start.sh"
