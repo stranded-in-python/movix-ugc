@@ -66,13 +66,13 @@ if __name__ == '__main__':
     logger.info('Первичное наполнение БД!')
     start_write(data_file_name,write_rows,write_batch_size)
 
+    logger.info('Старт основных замеров!')
+
     # Создание процесса для функции start_write
     write_process = multiprocessing.Process(target=start_write, args=(data_file_name,write_rows,write_batch_size,))
 
     # Создание процесса для функции start_read
     read_process = multiprocessing.Process(target=start_read, args=(select_sql,read_rows,read_batch_size,))
-
-    logger.info('Старт основных замеров!')
 
     # Запуск процессов
     write_process.start()
