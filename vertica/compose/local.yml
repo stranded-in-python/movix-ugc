@@ -1,0 +1,17 @@
+version: "3.8"
+
+name: "vertica benchmark"
+
+services:
+  vertica:
+    image: jbfavre/vertica:latest
+    ports:
+      - "5433:5433"
+
+  script:
+    build:
+      context: ../
+      dockerfile: /Dockerfile
+    depends_on:
+      - vertica
+    command: "/start.sh"
