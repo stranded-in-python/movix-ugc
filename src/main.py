@@ -1,10 +1,10 @@
 import uvicorn
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.responses import ORJSONResponse
 
 from config import settings
 from models import BasicViewEvent
-
+from services import ViewServiceABC, get_view_service
 
 app = FastAPI(
     title=settings.project_name,
@@ -16,16 +16,14 @@ app = FastAPI(
 
 @app.post("/api/v1/ugc/events/view")
 async def save_view(
-    event: BasicViewEvent
+    event: BasicViewEvent, view_service: ViewServiceABC = Depends(get_view_service)
 ):
-    return {"status": "success"}
+    event = await view_service.deserialize_to_binary(event)
+    print(event)
+    return event
 
 
 if __name__ == "__main__":
     uvicorn.run(
-        "main:app", host="0.0.0.0", port=8000, reload=True, reload_dirs=['/app']
+        "main:app", host="0.0.0.0", port=8000, reload=True, reload_dirs=["/app"]
     )
-# 1. по ручке приходит json {"topic":'views', "value": b'1611039931', "key": b'500271+tt0120338'}
-# 2. Есть проверка входных данных (pydantic, annotated)
-# 3. Модель pydantic попадает в QueueSerailizerManagerб
-# который берет нужный экземпляр класса QueueSerializer (WatchEventSerializer) и с помощью него получает бинарную строку, которую затем отправляет в клиент queue
