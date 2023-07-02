@@ -20,6 +20,7 @@ class BasicViewEvent(BaseModel):
 
     @validator("key")
     def check_key(v):
+        print("Checking")
         if len(v.split("+")) != 2:
             raise ValidationError
         else:
