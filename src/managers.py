@@ -1,45 +1,47 @@
 from abc import ABC, abstractmethod
-from typing import Any
 from functools import lru_cache
+from typing import Any
 
 from pydantic import BaseModel
 
-from serializers import EventSerializerABC, EventSerializer
-from storages import StorageABC, KafkaStorage
-from models import BasicViewEvent
-
+from deserializers import BrokerDeserializer, KafkaDeserializer
 from logger import logger
+from models import BasicViewEvent
+from storages import KafkaStorage, StorageABC
 
 logger()
 
-class QueueSerializerManager(ABC):
-    def __init__(self, deserializer: EventSerializerABC, storage: StorageABC):
+
+class EventSerializerManager(ABC):
+    def __init__(self, deserializer: BrokerDeserializer, storage: StorageABC):
         self.deserializer = deserializer
         self.storage = storage
 
     @abstractmethod
-    async def _deserialize_to_binary_dict(self, pydantic_model: BaseModel) -> dict[str, bytes]:
-        return await self.deserializer.deserialize_to_binary(pydantic_model.dict())
-    
+    async def _deserialize(self, pydantic_model: BaseModel) -> dict[Any, str]:
+        return await self.deserializer.deserialize(pydantic_model.dict())
+
     @abstractmethod
-    async def save_to_storage(self, pydantic_model: BaseModel):
-        data = self._deserialize_to_binary_dict(pydantic_model)
+    async def save_to_storage(self, pydantic_model: BaseModel) -> bool:
+        data = self._deserialize(pydantic_model)
         return await self.storage.save(data)
 
 
-class ViewSerializerManager(QueueSerializerManager):
-    def __init__(self, serializer: EventSerializerABC, storage: StorageABC):
-        self.deserializer = serializer
+class ViewSerializerManager(EventSerializerManager):
+    def __init__(self, deserializer: BrokerDeserializer, storage: StorageABC):
+        self.deserializer = deserializer
         self.storage = storage
 
-    async def _deserialize_to_binary_dict(self, pydantic_model: BasicViewEvent) -> dict[str, bytes]:
-        return await self.deserializer.deserialize_to_binary(pydantic_model.dict())
+    async def _deserialize(self, pydantic_model: BasicViewEvent) -> dict[Any, str]:
+        return await self.deserializer.deserialize(pydantic_model)
 
-    async def save_to_storage(self, pydantic_model: BasicViewEvent):
-        data = await self._deserialize_to_binary_dict(pydantic_model)
-        print(data)
-        return await self.storage.save(data)
+    async def save_to_storage(self, pydantic_model: BasicViewEvent) -> bool:
+        data = await self._deserialize(pydantic_model)
+        return await self.storage.save(topic="views", obj=data)
+
 
 @lru_cache
 def get_view_manager() -> ViewSerializerManager:
-    return ViewSerializerManager(serializer=EventSerializer(), storage=KafkaStorage())
+    return ViewSerializerManager(
+        deserializer=KafkaDeserializer(), storage=KafkaStorage()
+    )

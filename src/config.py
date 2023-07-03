@@ -17,7 +17,7 @@ class Settings(BaseSettings):
 
     view_event: str = "views"
 
-    kafka_host: str = 'localhost'
+    kafka_host: str = "localhost"
     kafka_port: int = 9092
 
     base_dir = os.path.dirname(os.path.dirname(__file__))

@@ -1,11 +1,12 @@
-import uvicorn
-from fastapi import FastAPI, Depends, HTTPException
-from fastapi.responses import ORJSONResponse
 from http import HTTPStatus
 
+import uvicorn
+from fastapi import Depends, FastAPI, HTTPException
+from fastapi.responses import ORJSONResponse
+
 from config import settings
-from models import BasicViewEvent
 from managers import ViewSerializerManager, get_view_manager
+from models import BasicViewEvent
 
 app = FastAPI(
     title=settings.project_name,
@@ -17,11 +18,15 @@ app = FastAPI(
 
 @app.post("/api/v1/ugc/events/view")
 async def save_view(
-    event: BasicViewEvent, view_manager: ViewSerializerManager = Depends(get_view_manager)
+    event: BasicViewEvent,
+    view_manager: ViewSerializerManager = Depends(get_view_manager),
 ):
     if not await view_manager.save_to_storage(event):
-        return HTTPException(status_code=HTTPStatus.SERVICE_UNAVAILABLE, detail="Broker timed out.")
-    
+        return HTTPException(
+            status_code=HTTPStatus.SERVICE_UNAVAILABLE, detail="Broker timed out."
+        )
+    return event
+
 
 if __name__ == "__main__":
     uvicorn.run(
