@@ -26,7 +26,7 @@ class KafkaStorage(StorageABC):
         )
 
     async def save(self, topic: str, obj: dict[Any, str]) -> bool:
-        key = obj.pop("key")
+        key = obj.pop("key_binary")
         try:
             self.kafka.send(topic=topic, key=key, value=obj)
             return True
