@@ -10,8 +10,8 @@ services:
 
   script:
     build:
-      context: ../
-      dockerfile: /Dockerfile
+      context: .
+      dockerfile: ./Dockerfile
     depends_on:
       - vertica
     command: "/start.sh"
