@@ -5,9 +5,9 @@ from typing import Any
 from pydantic import BaseModel
 
 from core.deserializers import BrokerDeserializer, KafkaDeserializer
-from settings.logger import logger
 from core.models import BasicViewEvent
 from core.storages import KafkaStorage, StorageABC
+from settings.logger import logger
 
 logger()
 

@@ -3,7 +3,6 @@ import os
 
 import psycopg2
 from database_loader import DatabaseLoaderRead, DatabaseLoaderWrite
-
 from logger import logger
 
 params = {

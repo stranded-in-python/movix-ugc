@@ -3,9 +3,8 @@ from contextlib import contextmanager
 
 import psycopg2
 from db_tester.utils import generate_random_data
-from timer import Timer
-
 from logger import logger
+from timer import Timer
 
 
 class DatabaseLoader(ABC):
