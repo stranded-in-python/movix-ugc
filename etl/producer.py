@@ -2,6 +2,7 @@ from confluent_kafka import Producer
 import socket
 from time import sleep
 import time
+from consumer.models import Settings, Message
 
 conf = {
     'bootstrap.servers': "localhost:9092",
@@ -27,14 +28,18 @@ def delivery_report(err, msg):
     else:
         print('Message delivered to {} [{}]'.format(msg.topic(), msg.partition()))
 
-for data in [str(time.time())]*40:
+for _ in range(40):
+    m = Message(
+        id=
+    )
+
     # Trigger any available delivery report callbacks from previous produce() calls
     producer.poll(0)
 
     # Asynchronously produce a message. The delivery report callback will
     # be triggered from the call to poll() above, or flush() below, when the
     # message has been successfully delivered or failed permanently.
-    producer.produce('views', data.encode('utf-8'), callback=delivery_report)
+    producer.produce('watching_movies', data.encode('utf-8'), callback=delivery_report)
 
 # Wait for any outstanding messages to be delivered and delivery report
 # callbacks to be triggered.
