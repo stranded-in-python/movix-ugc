@@ -2,7 +2,15 @@ from confluent_kafka import Producer
 import socket
 from time import sleep
 import time
+import json
+from faker import Faker
+import uuid
+import random
 from consumer.models import Settings, Message
+from utils import UUIDEncoder
+
+
+fake = Faker()
 
 conf = {
     'bootstrap.servers': "localhost:9092",
@@ -30,7 +38,11 @@ def delivery_report(err, msg):
 
 for _ in range(40):
     m = Message(
-        id=
+        id=random.getrandbits(34),
+        user_id=uuid.UUID(int=random.getrandbits(128)),
+        film_id=uuid.UUID(int=random.getrandbits(128)),
+        frameno=random.getrandbits(32),
+        timestamp=fake.date_time()
     )
 
     # Trigger any available delivery report callbacks from previous produce() calls
@@ -39,7 +51,7 @@ for _ in range(40):
     # Asynchronously produce a message. The delivery report callback will
     # be triggered from the call to poll() above, or flush() below, when the
     # message has been successfully delivered or failed permanently.
-    producer.produce('watching_movies', data.encode('utf-8'), callback=delivery_report)
+    producer.produce('watching_movies', json.dumps(m.dict(), cls=UUIDEncoder).encode(), callback=delivery_report)
 
 # Wait for any outstanding messages to be delivered and delivery report
 # callbacks to be triggered.

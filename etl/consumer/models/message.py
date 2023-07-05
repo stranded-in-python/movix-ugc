@@ -1,6 +1,7 @@
-from pydantic import BaseModel
-import pendulum
 from uuid import UUID
+
+import pendulum
+from pydantic import BaseModel
 
 
 class Message(BaseModel):

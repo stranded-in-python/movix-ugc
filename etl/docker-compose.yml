@@ -191,3 +191,11 @@ services:
       - CH_DATABASE=${CLICKHOUSE_DATABASE}
       - CH_USERNAME=${CLICKHOUSE_USERNAME}
       - CH_PASSWORD=${CLICKHOUSE_PASSWORD}
+
+  consumer:
+    container_name: consumer
+    build:
+      context: consumer
+      target: prod
+    env_file: .env.example
+    restart: always

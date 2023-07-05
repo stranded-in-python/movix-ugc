@@ -5,5 +5,7 @@ ch-init:
 	docker exec --user clickhouse -it clickhouse /bin/bash -c "/home/init.sh"
 	docker exec --user clickhouse -it clickhouse clickhouse-client --queries-file /home/table.sql
 
-start:
+build:
 	docker-compose --env-file ./.env.example up -d --no-deps --build
+
+start: build ch-init
