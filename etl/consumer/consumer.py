@@ -4,35 +4,40 @@ from contextlib import contextmanager
 
 import clickhouse_connect
 import pendulum
-from backoff import on_exception
+from clickhouse_connect.driver import Client
 from clickhouse_connect.driver.exceptions import ClickHouseError
 from clickhouse_connect.driver.tools import insert_file
-from confluent_kafka import Consumer, KafkaError, KafkaException
+from confluent_kafka import Consumer as KafkaConsumer
+from confluent_kafka import KafkaError
+from confluent_kafka import KafkaException
+from confluent_kafka import Message as KafkaMessage
+
+from backoff import on_exception
 from logger import logger
-from models import Message, Settings
+from models import Message
+from models import Settings
 from utils import json_decoder
 
 
 class Executer:
+    """Управление процессом ETL из Kafka в Clickhouse."""
+
     def __init__(self):
         self.settings = Settings()
-        self.data_filename = "data.csv"
-        self.column_names = [field for field in Message.__fields__]
+        self.data_filename = 'data.csv'
+        self.column_names = Message.__fields__.keys()
 
     @contextmanager
-    def _get_consumer(self):
-        consumer = Consumer(
-            {
-                "bootstrap.servers": self.settings.kafka_server,
-                "group.id": self.settings.group_id,
-                "auto.offset.reset": "latest",
-                #'auto.offset.reset': 'earliest',
-                "partition.assignment.strategy": "roundrobin",
-                "enable.auto.commit": "true",
-                "session.timeout.ms": "45000",
-                #'broker.address.family': 'v4',
-            }
-        )
+    def _get_consumer(self) -> KafkaConsumer:
+        consumer = KafkaConsumer({
+            'bootstrap.servers': self.settings.kafka_server,
+            'group.id': self.settings.group_id,
+            'auto.offset.reset': 'latest',
+            'partition.assignment.strategy': 'roundrobin',
+            'enable.auto.commit': 'true',
+            'session.timeout.ms': '45000',
+            'broker.address.family': 'v4',
+        })
         consumer.subscribe([self.settings.topic])
         try:
             yield consumer
@@ -41,10 +46,6 @@ class Executer:
 
     @on_exception(
         exception=ClickHouseError,
-        start_sleep_time=1,
-        factor=2,
-        border_sleep_time=15,
-        max_retries=15,
         logger=logger,
     )
     def _set_client_db(self):
@@ -57,7 +58,7 @@ class Executer:
         )
 
     @contextmanager
-    def _get_client_db(self):
+    def _get_client_db(self) -> Client:
         self._set_client_db()
         try:
             yield self.client
@@ -65,22 +66,38 @@ class Executer:
             self.client.close()
 
     def _to_deadleter_queue(self, message: bytes):
-        logger.error("Exception on message to model: %s", (str(message),))
+        logger.error('Exception on message to model: %s', (str(message),))
 
     def _to_csv_line(self, model: Message):
         # Приведём формат времени к clickhouse
-        model.timestamp = model.timestamp.format("YYYY-MM-DD hh:mm:ss")
+        model.timestamp = model.timestamp.format('YYYY-MM-DD hh:mm:ss')
         return (
-            ",".join([str(getattr(model, field, "")) for field in Message.__fields__])
-            + "\n"
+            ','.join([str(getattr(model, field, '')) for field in self.column_names])
+            + '\n'
         )
+
+    def _messages_to_csv(self, messages: list[KafkaMessage]):
+        with open(self.data_filename, 'wt') as csv:
+            for message in messages:
+                try:
+                    msg = json_decoder(message.value())
+                    ts = pendulum.parse(msg['timestamp'])
+                    # Transform.
+                    model = Message(
+                        id=msg['id'],
+                        user_id=uuid.UUID(msg['user_id']),
+                        film_id=uuid.UUID(msg['film_id']),
+                        frameno=msg['frameno'],
+                        timestamp=pendulum.from_timestamp(
+                            timestamp=ts // 1000),
+                    )
+                    csv.write(self._to_csv_line(model))
+                except Exception as e:
+                    self._to_deadleter_queue(message.value())
+                    logger.error(e)
 
     @on_exception(
         exception=ClickHouseError,
-        start_sleep_time=1,
-        factor=2,
-        border_sleep_time=15,
-        max_retries=15,
         logger=logger,
     )
     def _data_to_clickhouse(self):
@@ -93,19 +110,26 @@ class Executer:
         )
 
     def run(self):
+        """Запуск цикла процесса ETL."""
+        consumer: KafkaConsumer
+        msg: KafkaMessage
+        messages: list[KafkaMessage] = []
         timeout_seconds = self.settings.batch_timeout
-        messages = []
+
         with self._get_consumer() as consumer:
-            with self._get_client_db() as _:
+            with self._get_client_db():
                 while True:
+                    # Extract.
                     msg = consumer.poll(1.0)
 
+                    # Ограничиваем процесс по времени
                     if msg is None:
                         timeout_seconds -= 1
                         if timeout_seconds >= 0:
                             continue
 
                     if msg:
+                        # Проверяем на ошибки
                         err = msg.error()
                         if err:
                             if err.code() != KafkaError._PARTITION_EOF:
@@ -116,37 +140,21 @@ class Executer:
                     messages_read = len(messages)
                     if timeout_seconds < 0 or messages_read >= self.settings.batch_size:
                         if messages:
-                            with open(self.data_filename, "wt") as file:
-                                for message in messages:
-                                    try:
-                                        m = json_decoder(message.value())
-                                        ts = message.timestamp()[1]
-                                        model = Message(
-                                            id=m["id"],
-                                            user_id=uuid.UUID(m["user_id"]),
-                                            film_id=uuid.UUID(m["film_id"]),
-                                            frameno=m["frameno"],
-                                            timestamp=pendulum.from_timestamp(
-                                                timestamp=ts // 1000
-                                            ),
-                                        )
-                                        file.write(self._to_csv_line(model))
-                                    except Exception as e:
-                                        self._to_deadleter_queue(message.value())
-                                        logger.error(e)
-
+                            self._messages_to_csv(messages)
+                            # Load.
+                            self._data_to_clickhouse()
+                            # Очищаем
                             messages = []
 
-                            self._data_to_clickhouse()
-
                         timeout_seconds = self.settings.batch_timeout
+
                         if messages_read:
                             logger.warning(f"Pushed {messages_read} messages")
                         else:
-                            logger.warning(f"No messages, to sleep")
+                            logger.warning('No messages, to sleep')
                             time.sleep(5)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     exec = Executer()
     exec.run()

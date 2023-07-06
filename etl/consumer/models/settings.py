@@ -2,7 +2,7 @@ from pydantic import BaseSettings, Field
 
 
 class Settings(BaseSettings):
-    kafka_host: str = Field("localhost1", env="KAFKA_HOST")
+    kafka_host: str = Field("localhost", env="KAFKA_HOST")
     kafka_port: str = Field("9092", env="KAFKA_PORT")
     group_id: str = Field("group_watching_movies", env="KAFKA_GROUP_ID")
     topic: str = Field("watching_movies", env="KAFKA_TOPIC")
