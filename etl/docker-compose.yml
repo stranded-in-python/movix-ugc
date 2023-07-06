@@ -178,9 +178,7 @@ services:
       KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
 
   clickhouse:
-    container_name: clickhouse
-    build:
-      context: clickhouse
+    image: clickhouse/clickhouse-server:latest
     expose:
       - 8123
       - 9000
@@ -193,9 +191,8 @@ services:
       - CH_PASSWORD=${CLICKHOUSE_PASSWORD}
 
   consumer:
-    container_name: consumer
     build:
       context: consumer
-      target: prod
-    env_file: .env.example
+      env_file:
+      - ./.envs/.local/.clickhouse
     restart: always
