@@ -5,8 +5,8 @@ from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import ORJSONResponse
 
 from core.config import settings
-from core.managers import ViewSerializerManager, get_view_manager
-from core.models import BasicViewEvent
+from managers import ViewSerializerManager, get_view_manager
+from models import BasicViewEvent
 
 app = FastAPI(
     title=settings.project_name,

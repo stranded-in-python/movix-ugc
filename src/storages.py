@@ -6,8 +6,8 @@ import msgpack
 from kafka import KafkaProducer
 from kafka.errors import KafkaTimeoutError
 
-from .config import settings
-from .logger import logger
+from core.config import settings
+from core.logger import logger
 
 logger()
 
