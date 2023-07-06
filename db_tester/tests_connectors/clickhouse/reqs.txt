@@ -1,4 +1,0 @@
-faker
-aiochclient
-aiohttp
-clickhouse-driver
