@@ -6,8 +6,8 @@ import msgpack
 from kafka import KafkaProducer
 from kafka.errors import KafkaTimeoutError
 
-from config import settings
-from logger import logger
+from settings.config import settings
+from settings.logger import logger
 
 logger()
 
@@ -26,7 +26,7 @@ class KafkaStorage(StorageABC):
         )
 
     async def save(self, topic: str, obj: dict[Any, str]) -> bool:
-        key = obj.pop("key")
+        key = obj.pop("key_binary")
         try:
             self.kafka.send(topic=topic, key=key, value=obj)
             return True

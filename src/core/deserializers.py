@@ -13,7 +13,7 @@ class KafkaDeserializer(BrokerDeserializer):
     async def deserialize(self, model: BaseModel) -> dict[Any, str]:
         raw_dict = model.dict()
         deserialized_dict = {}
-        deserialized_dict["key"] = str(raw_dict.pop("id")).encode("ascii")
+        deserialized_dict["key_binary"] = str(raw_dict.get("id")).encode("ascii")
         for key, val in raw_dict.items():
             deserialized_dict[key] = str(val)
         return deserialized_dict
