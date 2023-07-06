@@ -4,10 +4,10 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from core.deserializers import BrokerDeserializer, KafkaDeserializer
-from core.models import BasicViewEvent
-from core.storages import KafkaStorage, StorageABC
-from settings.logger import logger
+from .deserializers import BrokerDeserializer, KafkaDeserializer
+from .models import BasicViewEvent
+from .storages import KafkaStorage, StorageABC
+from .logger import logger
 
 logger()
 
