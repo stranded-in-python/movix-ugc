@@ -49,16 +49,16 @@ COPY --from=python-build-stage /usr/src/app/wheels  /wheels/
 RUN pip install --no-cache-dir --no-index --find-links=/wheels/ /wheels/* \
 	&& rm -rf /wheels/
 
-COPY ./compose/local/api/entrypoint.sh /entrypoint.sh
-RUN sed -i 's/\r$//g' /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY ./compose/production/api/entrypoint /entrypoint
+RUN sed -i 's/\r$//g' /entrypoint
+RUN chmod +x /entrypoint
 
-COPY ./compose/production/api/start.sh /start.sh
-RUN sed -i 's/\r$//g' /start.sh
-RUN chmod +x /start.sh
+COPY ./compose/production/api/start /start
+RUN sed -i 's/\r$//g' /start
+RUN chmod +x /start
 
 # copy application code to WORKDIR
 COPY ./src ${APP_HOME}
 # COPY ./pyproject.toml /pyproject.toml
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint"]
