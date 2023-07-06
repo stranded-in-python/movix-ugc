@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   build-essential
 
 # Requirements are installed here to ensure they will be cached.
-COPY ./requirements/etl .
+COPY ./requirements .
 
 # Create Python Dependency and Sub-Dependency Wheels.
 RUN pip wheel --wheel-dir /usr/src/app/wheels  \
@@ -49,11 +49,11 @@ COPY --from=python-build-stage /usr/src/app/wheels  /wheels/
 RUN pip install --no-cache-dir --no-index --find-links=/wheels/ /wheels/* \
 	&& rm -rf /wheels/
 
-COPY ./compose/etl/production/entrypoint /entrypoint
+COPY ./compose/production/etl/entrypoint /entrypoint
 RUN sed -i 's/\r$//g' /entrypoint
 RUN chmod +x /entrypoint
 
-COPY ./compose/etl/local/start /start
+COPY ./compose/production/etl/start /start
 RUN sed -i 's/\r$//g' /start
 RUN chmod +x /start
 

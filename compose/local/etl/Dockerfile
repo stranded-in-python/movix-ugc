@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   build-essential
 
 # Requirements are installed here to ensure they will be cached.
-COPY ./requirements .
+COPY ./requirements/etl .
 
 # Create Python Dependency and Sub-Dependency Wheels.
 RUN pip wheel --wheel-dir /usr/src/app/wheels  \
@@ -58,7 +58,7 @@ RUN sed -i 's/\r$//g' /start
 RUN chmod +x /start
 
 # copy application code to WORKDIR
-COPY ./src ${APP_HOME}
+COPY ./etl ${APP_HOME}
 # COPY ./pyproject.toml /pyproject.toml
 
 ENTRYPOINT ["/entrypoint"]
