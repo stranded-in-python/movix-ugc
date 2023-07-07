@@ -2,9 +2,10 @@ from abc import ABC, abstractmethod
 from contextlib import contextmanager
 
 import psycopg2
-from benchmark.utils import generate_random_data
 from logger import logger
 from timer import Timer
+
+from .utils import generate_random_data
 
 
 class DatabaseLoader(ABC):
@@ -47,8 +48,7 @@ class DatabaseLoaderRead(DatabaseLoader):
     @Timer(name="read", logger=logger.info)
     def _select(self, curs):
         curs.execute(self.sql, self.params_sql)
-        result = curs.fetchall()
-        # logger.info(f"Count read rows: {len(result)}")
+        curs.fetchall()
 
     def _exec(self, conn, curs):
         offset = 0
