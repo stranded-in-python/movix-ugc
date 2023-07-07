@@ -71,7 +71,7 @@ jobs:
 
           labels: |
             maintainer=${{ github.actor }}
-            
+
   builder-etl:
     environment: production
     runs-on: ubuntu-latest
