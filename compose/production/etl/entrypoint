@@ -7,6 +7,7 @@ import sys
 from pydantic import BaseSettings, Field
 
 import clickhouse_connect
+from clickhouse_connect.driver.client import Client
 from clickhouse_connect.driver.exceptions import ClickHouseError
 
 class Settings(BaseSettings):

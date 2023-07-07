@@ -1,7 +1,6 @@
 import sys
 
 import clickhouse_connect
-from clickhouse_connect.driver.client import Client
 from clickhouse_connect.driver.exceptions import ClickHouseError
 from confluent_kafka import Consumer, KafkaException
 from pydantic import BaseSettings, Field
@@ -36,14 +35,13 @@ def ping_kafka():
                 "bootstrap.servers": settings.kafka_server,
                 "group.id": settings.group_id,
                 "auto.offset.reset": "latest",
-                #'auto.offset.reset': 'earliest',
                 "partition.assignment.strategy": "roundrobin",
                 "enable.auto.commit": "true",
                 "session.timeout.ms": "45000",
-                #'broker.address.family': 'v4',
+                'broker.address.family': 'v4',
             }
         )
-        topics = kc.list_topics(timeout=1)
+        kc.list_topics(timeout=1)
 
     except KafkaException:
         sys.exit(-1)
