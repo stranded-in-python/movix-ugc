@@ -21,10 +21,10 @@ def sleep_expo_gen(initial, maximum, factor):
 def on_exception(
     exception,
     logger,
-    start_sleep_time,
+    start_sleep_time=1,
     factor=2,
-    border_sleep_time=10,
-    max_retries=10,
+    border_sleep_time=15,
+    max_retries=15,
 ):
     def retry_exception(target):
         # Декорируем с помощью wraps,
