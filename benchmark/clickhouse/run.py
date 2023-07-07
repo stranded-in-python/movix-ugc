@@ -1,9 +1,7 @@
 import sys
-from threading import Thread
 from multiprocessing import Process
 
 from clickhouse_driver import Client
-from datetime import datetime as dt
 
 sys.path.append("..")
 from utils import generate_random_data, timing
@@ -17,18 +15,20 @@ class ClickHouseTester:
         self.rows_number = 10_000_000
 
     def _before_testing(self):
-        self.ch.execute("CREATE DATABASE IF NOT EXISTS test_db ON CLUSTER company_cluster")
-        self.ch.execute("""
-        CREATE TABLE IF NOT EXISTS test_db.regular_table ON CLUSTER company_cluster 
+        self.ch.execute(
+            "CREATE DATABASE IF NOT EXISTS test_db ON CLUSTER company_cluster"
+        )
+        self.ch.execute(
+            """
+        CREATE TABLE IF NOT EXISTS test_db.regular_table ON CLUSTER company_cluster
         (id Int64, user_id Int64, film_id Int64, timestamp DateTime64)
         Engine=MergeTree() ORDER BY id
-        """)
+        """
+        )
         self.just_write(self.ch)
 
     def _after_testing(self):
-        self.ch.execute(
-            "DROP DATABASE IF EXISTS test_db ON CLUSTER company_cluster"
-        )
+        self.ch.execute("DROP DATABASE IF EXISTS test_db ON CLUSTER company_cluster")
 
     def test(self):
         self._before_testing()
@@ -47,23 +47,25 @@ class ClickHouseTester:
         batch = next(generate_random_data())
         ch.execute(
             "INSERT INTO test_db.regular_table (id, user_id, film_id, timestamp) VALUES",
-            batch
+            batch,
         )
-    
+
     def just_write(self, ch: Client):
         for batch in generate_random_data():
             ch.execute(
                 "INSERT INTO test_db.regular_table (id, user_id, film_id, timestamp) VALUES",
-                batch
+                batch,
             )
 
     def _check_read_while_write(self):
         self.check_read(self.ch)
         self.check_write(self.ch)
-        
+
     @timing
     def check_read(self, ch: Client):
-        data = ch.execute(f"SELECT * from test_db.regular_table LIMIT 0,{self.batch_size}")[0]
+        data = ch.execute(
+            f"SELECT * from test_db.regular_table LIMIT 0,{self.batch_size}"
+        )[0]
         print(f"Selected {self.batch_size} rows")
         print(f"Sample Data: {[str(col) for col in data]}")
 
@@ -77,7 +79,7 @@ class ClickHouseTester:
         test.join()
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     tester = ClickHouseTester()
     tester.test()
 

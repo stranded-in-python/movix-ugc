@@ -1,10 +1,7 @@
 import time
 from contextlib import ContextDecorator
-from dataclasses import dataclass
-from dataclasses import field
-from typing import Any
-from typing import Callable
-from typing import Optional
+from dataclasses import dataclass, field
+from typing import Any, Callable, Optional
 
 
 class TimerError(Exception):
@@ -16,7 +13,7 @@ class Timer(ContextDecorator):
     """Time your code using a class, context manager, or decorator"""
 
     total: int = 0
-    name: Optional[str] = 'Timer'
+    name: Optional[str] = "Timer"
     text: str = "Elapsed time: {:0.4f} seconds"
     logger: Optional[Callable[[str], None]] = print
     _start_time: Optional[float] = field(default=None, init=False, repr=False)
@@ -41,7 +38,7 @@ class Timer(ContextDecorator):
         if self.logger:
             self.logger(self.text.format(elapsed_time) + f" [{self.name}]")
         if self.name:
-            #self.timers[self.name] += elapsed_time
+            # self.timers[self.name] += elapsed_time
             self.total += elapsed_time
 
         return elapsed_time
