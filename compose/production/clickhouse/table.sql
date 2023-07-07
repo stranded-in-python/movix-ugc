@@ -1,4 +1,4 @@
-create table db1.watching_movies/*ON CLUSTER cluster*/(
+create table if not exists db1.watching_movies/*ON CLUSTER cluster*/(
     id UInt32,
     user_id UUID,
     film_id UUID,
