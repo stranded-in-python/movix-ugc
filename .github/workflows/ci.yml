@@ -33,14 +33,13 @@ jobs:
           python-version: "3.11"
           cache: pip
           cache-dependency-path: |
-            requirements/base.txt
-            requirements/local.txt
+            requirements.txt
 
       - name: pre-commit
         run: |
           python3.11 -m venv .venv
           source .venv/bin/activate
-          pip install -r requirements/local.txt
+          pip install -r requirements.txt
           pre-commit run --show-diff-on-failure --color=always --all-files
 
   builder-api:
@@ -71,7 +70,7 @@ jobs:
 
           labels: |
             maintainer=${{ github.actor }}
-            
+
   builder-etl:
     environment: production
     runs-on: ubuntu-latest

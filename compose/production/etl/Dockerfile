@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   build-essential
 
 # Requirements are installed here to ensure they will be cached.
-COPY ./requirements .
+COPY ./requirements/etl .
 
 # Create Python Dependency and Sub-Dependency Wheels.
 RUN pip wheel --wheel-dir /usr/src/app/wheels  \
