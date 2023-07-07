@@ -1,24 +1,21 @@
 import time
 import uuid
 from contextlib import contextmanager
-from typing import Any
-from typing import Generator
+from typing import Any, Generator
 
 import clickhouse_connect
 import pendulum
+from backoff import on_exception
 from clickhouse_connect.driver import Client
 from clickhouse_connect.driver.exceptions import ClickHouseError
 from clickhouse_connect.driver.tools import insert_file
 from confluent_kafka import Consumer as KafkaConsumer
-from confluent_kafka import KafkaError
-from confluent_kafka import KafkaException
+from confluent_kafka import KafkaError, KafkaException
 from confluent_kafka import Message as KafkaMessage
-
-from backoff import on_exception
 from logger import logger
-from models import Message
-from models import Settings
 from utils import json_decoder
+
+from models import Message, Settings
 
 
 class Executer:
@@ -31,25 +28,24 @@ class Executer:
 
     @contextmanager
     def _get_consumer(self) -> Generator[KafkaConsumer, Any, Any]:
-        consumer = KafkaConsumer({
-            'bootstrap.servers': self.settings.kafka_server,
-            'group.id': self.settings.group_id,
-            'auto.offset.reset': 'latest',
-            'partition.assignment.strategy': 'roundrobin',
-            'enable.auto.commit': 'true',
-            'session.timeout.ms': '45000',
-            'broker.address.family': 'v4',
-        })
+        consumer = KafkaConsumer(
+            {
+                'bootstrap.servers': self.settings.kafka_server,
+                'group.id': self.settings.group_id,
+                'auto.offset.reset': 'latest',
+                'partition.assignment.strategy': 'roundrobin',
+                'enable.auto.commit': 'true',
+                'session.timeout.ms': '45000',
+                'broker.address.family': 'v4',
+            }
+        )
         consumer.subscribe([self.settings.topic])
         try:
             yield consumer
         finally:
             consumer.close()
 
-    @on_exception(
-        exception=ClickHouseError,
-        logger=logger,
-    )
+    @on_exception(exception=ClickHouseError, logger=logger)
     def _set_client_db(self):
         self.client = clickhouse_connect.get_client(
             host=self.settings.ch_host,
@@ -82,30 +78,26 @@ class Executer:
         with open(self.data_filename, 'wt') as csv:
             for message in messages:
                 try:
-                    msg = json_decoder(message.value())                    
+                    msg = json_decoder(message.value())
                     # Transform.
                     model = Message(
                         id=int(msg['id']),
                         user_id=uuid.UUID(msg['user_id']),
                         film_id=uuid.UUID(msg['film_id']),
                         frameno=int(msg['frameno']),
-                        timestamp=pendulum.parse(msg['timestamp'])
+                        timestamp=pendulum.parse(msg['timestamp']),
                     )
                     csv.write(self._to_csv_line(model))
                 except Exception as e:
                     self._to_deadletter_queue(message.value())
                     logger.error(e)
 
-    def _dump_messages_2_csv(self, messages: list[KafkaMessage]):
+    def _dump_messages_to_csv(self, messages: list[KafkaMessage]):
         if messages:
             self._messages_to_csv(messages)
             self._data_to_clickhouse()
 
-
-    @on_exception(
-        exception=ClickHouseError,
-        logger=logger,
-    )
+    @on_exception(exception=ClickHouseError, logger=logger)
     def _data_to_clickhouse(self):
         insert_file(
             self.client,
@@ -114,6 +106,13 @@ class Executer:
             column_names=self.column_names,
             database=self.settings.ch_db,
         )
+
+    def _no_error(self, msg: KafkaMessage):
+        if msg:
+            err = msg.error()
+            if err:
+                if err.code() != KafkaError._PARTITION_EOF:
+                    raise KafkaException(msg.error())
 
     def run(self):
         """Запуск цикла процесса ETL."""
@@ -135,20 +134,15 @@ class Executer:
                             continue
 
                     # Проверяем на ошибки
-                    if msg:
-                        err = msg.error()
-                        if err:
-                            if err.code() != KafkaError._PARTITION_EOF:
-                                raise KafkaException(msg.error())
-                        else:
-                            messages.append(msg)
+                    if self._no_error(msg):
+                        messages.append(msg)
 
                     messages_read = len(messages)
                     if timeout_seconds > 0 and messages_read < self.settings.batch_size:
                         continue
 
                     # Load.
-                    self._dump_messages_2_csv(messages)
+                    self._dump_messages_to_csv(messages)
 
                     # Сбрасываем
                     messages = []

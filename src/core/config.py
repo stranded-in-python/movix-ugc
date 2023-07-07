@@ -1,7 +1,7 @@
 import os
 
-from pydantic import BaseSettings
-from pydantic import Field
+from pydantic import BaseSettings, Field
+
 
 class ModelConfig:
     allow_population_by_field_name = True
