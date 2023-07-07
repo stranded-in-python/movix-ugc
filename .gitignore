@@ -179,3 +179,4 @@ pyrightconfig.json
 !.envs/.*.example
 projects/
 .vscode/launch.json
+NetrwTreeListing

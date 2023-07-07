@@ -37,10 +37,7 @@ def drop_or_create(ini_sql_file):
 def start_read(select_file, rows, batch_size):
     sql = open(select_file).read()
     reader = DatabaseLoaderRead(
-        params=params,
-        rows=rows,
-        batch_size=batch_size,
-        sql=sql,
+        params=params, rows=rows, batch_size=batch_size, sql=sql
     )
     reader.start()
 
@@ -67,22 +64,12 @@ if __name__ == "__main__":
 
     # Создание процесса для функции start_write
     write_process = multiprocessing.Process(
-        target=start_write,
-        args=(
-            data_file_name,
-            write_rows,
-            write_batch_size,
-        ),
+        target=start_write, args=(data_file_name, write_rows, write_batch_size)
     )
 
     # Создание процесса для функции start_read
     read_process = multiprocessing.Process(
-        target=start_read,
-        args=(
-            select_sql,
-            read_rows,
-            read_batch_size,
-        ),
+        target=start_read, args=(select_sql, read_rows, read_batch_size)
     )
 
     # Запуск процессов
