@@ -59,6 +59,7 @@ RUN chmod +x /start
 
 # copy application code to WORKDIR
 COPY ./etl ${APP_HOME}
+COPY ./src/core/config.py ${APP_HOME}/consumer/models/config.py
 # COPY ./pyproject.toml /pyproject.toml
 
 ENTRYPOINT ["/entrypoint"]

@@ -96,6 +96,12 @@ class Executer:
                     self._to_deadletter_queue(message.value())
                     logger.error(e)
 
+    def _dump_messages_2_csv(self, messages: list[KafkaMessage]):
+        if messages:
+            self._messages_to_csv(messages)
+            self._data_to_clickhouse()
+
+
     @on_exception(
         exception=ClickHouseError,
         logger=logger,
@@ -128,8 +134,8 @@ class Executer:
                         if timeout_seconds >= 0:
                             continue
 
+                    # Проверяем на ошибки
                     if msg:
-                        # Проверяем на ошибки
                         err = msg.error()
                         if err:
                             if err.code() != KafkaError._PARTITION_EOF:
@@ -138,21 +144,21 @@ class Executer:
                             messages.append(msg)
 
                     messages_read = len(messages)
-                    if timeout_seconds < 0 or messages_read >= self.settings.batch_size:
-                        if messages:
-                            self._messages_to_csv(messages)
-                            # Load.
-                            self._data_to_clickhouse()
-                            # Очищаем
-                            messages = []
+                    if timeout_seconds > 0 and messages_read < self.settings.batch_size:
+                        continue
 
-                        timeout_seconds = self.settings.batch_timeout
+                    # Load.
+                    self._dump_messages_2_csv(messages)
 
-                        if messages_read:
-                            logger.warning(f"Pushed {messages_read} messages")
-                        else:
-                            logger.warning('No messages, to sleep')
-                            time.sleep(5)
+                    # Сбрасываем
+                    messages = []
+                    timeout_seconds = self.settings.batch_timeout
+
+                    if messages_read:
+                        logger.warning(f"Pushed {messages_read} messages")
+                    else:
+                        logger.warning('No messages, to sleep')
+                        time.sleep(5)
 
 
 if __name__ == '__main__':
