@@ -1,10 +1,8 @@
-import sys
 from multiprocessing import Process
 
 from clickhouse_driver import Client
 
-sys.path.append("..")
-from utils import generate_random_data, timing
+from .utils import generate_random_data, timing
 
 
 class ClickHouseTester:
@@ -46,14 +44,20 @@ class ClickHouseTester:
         print(f"Inserted {self.batch_size} rows")
         batch = next(generate_random_data())
         ch.execute(
-            "INSERT INTO test_db.regular_table (id, user_id, film_id, timestamp) VALUES",
+            (
+                "INSERT INTO test_db.regular_table "
+                "(id, user_id, film_id, timestamp) VALUES"
+            ),
             batch,
         )
 
     def just_write(self, ch: Client):
         for batch in generate_random_data():
             ch.execute(
-                "INSERT INTO test_db.regular_table (id, user_id, film_id, timestamp) VALUES",
+                (
+                    "INSERT INTO test_db.regular_table "
+                    "(id, user_id, film_id, timestamp) VALUES"
+                ),
                 batch,
             )
 
