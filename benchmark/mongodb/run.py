@@ -7,7 +7,6 @@ class MongoTester:
     def __init__(self, client: MongoClient = MongoClient("localhost", 27017)):
         self.client = client
         self.db = self.client.test_database
-        self.db1 = self.client.test_database
         self.batch_size = 1000
         self.rows_number = 10_000_000
         self.collections_to_test = {
@@ -20,7 +19,7 @@ class MongoTester:
 
     def test(self):
         print(f"--Filling with {self.rows_number} docs each collection--")
-        self._just_write_rows(self.db1)
+        self._just_write_rows()
         print("--Done. Test begin--")
         print("--Write--")
         self._check_write()
@@ -72,7 +71,9 @@ class MongoTester:
         print(f"Selected {self.batch_size} rows")
         # print(f"Sample Data: {data[0]}")
 
-    def _just_write_rows(self, db: database):
+    def _just_write_rows(self,):
+        client = MongoClient("localhost", 27017)
+        db = client.test_database
         for coll, func in self.collections_to_test.items():
             collection = db[coll]
             for batch in func():
@@ -95,7 +96,7 @@ class MongoTester:
 
     @timing
     def check_read_while_write(self):
-        noise = Process(target=self._just_write_rows, args=(self.db1,))
+        noise = Process(target=self._just_write_rows)
         test = Process(target=self._check_read_and_write)
         noise.start()
         test.start()
