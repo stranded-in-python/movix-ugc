@@ -40,7 +40,7 @@ class Timer(ContextDecorator):
         # Report elapsed time
         if self.logger and self.logg_steps:
             self.logger(self.text.format(elapsed_time) + f" [{self.name}]")
-            
+
         return elapsed_time
 
     def logging_summary(self):

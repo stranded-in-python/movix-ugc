@@ -1,15 +1,12 @@
 import multiprocessing
 import os
-import logging
 import sys
 import time
 
 import psycopg2
 from backoff import on_exception
-from loader import Reader
-from loader import Writer
+from loader import Reader, Writer
 from logger import logger
-
 
 params = {
     "host": "greenplum",
@@ -46,12 +43,7 @@ def drop_or_create(ini_sql_file):
 def start_read(sql_file, rows, batch_size, decorate: bool = True):
     sql = open(sql_file).read()
     reader = Reader(
-        sql,
-        'read',
-        params,
-        rows=rows,
-        batch_size=batch_size,
-        decorate=decorate,
+        sql, 'read', params, rows=rows, batch_size=batch_size, decorate=decorate
     )
     reader.start()
 
@@ -73,7 +65,9 @@ if __name__ == "__main__":
     drop_or_create(init_sql)
     logger.info("Бд очищена!")
 
-    logger.info(f"Запись в БД без нагрузки [batch={write_batch_size}, rows={write_rows}] ...")
+    logger.info(
+        f"Запись в БД без нагрузки [batch={write_batch_size}, rows={write_rows}] ..."
+    )
     benchmark_write_process = multiprocessing.Process(
         target=start_write, args=(data_file_name1, write_rows, write_batch_size)
     )
@@ -83,7 +77,9 @@ if __name__ == "__main__":
     # Дадим время на передышку
     time.sleep(5)
 
-    logger.info(f"Чтение из БД без нагрузки [batch={read_batch_size}, rows={read_rows}] ...")
+    logger.info(
+        f"Чтение из БД без нагрузки [batch={read_batch_size}, rows={read_rows}] ..."
+    )
     benchmark_read_process = multiprocessing.Process(
         target=start_read, args=(select_sql, read_rows, read_batch_size)
     )
@@ -96,14 +92,18 @@ if __name__ == "__main__":
     )
     write_process.start()
 
-    logger.info(f"Запись в БД под нагрузкой [batch={write_batch_size}, rows={write_rows}] ...")
+    logger.info(
+        f"Запись в БД под нагрузкой [batch={write_batch_size}, rows={write_rows}] ..."
+    )
     benchmark_write_process = multiprocessing.Process(
         target=start_write, args=(data_file_name1, write_rows, write_batch_size)
     )
     benchmark_write_process.start()
     benchmark_write_process.join()
 
-    logger.info(f"Чтение из БД под нагрузкой [batch={read_batch_size}, rows={read_rows}] ...")
+    logger.info(
+        f"Чтение из БД под нагрузкой [batch={read_batch_size}, rows={read_rows}] ..."
+    )
     benchmark_read_process = multiprocessing.Process(
         target=start_read, args=(select_sql, read_rows, read_batch_size)
     )

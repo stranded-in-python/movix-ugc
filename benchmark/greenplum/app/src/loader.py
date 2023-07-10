@@ -4,18 +4,17 @@ from contextlib import contextmanager
 import psycopg2
 from logger import logger
 from timer import Timer
-
 from utils import generate_random_data
 
 
 class DatabaseLoader(ABC):
     def __init__(
-            self,
-            name: str,
-            params: dict,
-            rows: int = 10_000_000,
-            batch_size: int = 100_000,
-            decorate: bool = True
+        self,
+        name: str,
+        params: dict,
+        rows: int = 10_000_000,
+        batch_size: int = 100_000,
+        decorate: bool = True,
     ):
         self.batch_size = batch_size
         self.rows = rows
@@ -26,7 +25,6 @@ class DatabaseLoader(ABC):
         if decorate:
             self.timer = Timer(name=name, logger=logger.info)
             self._observed = self.timer(self._observed)
-
 
     @contextmanager
     def _connection(self):
@@ -62,6 +60,7 @@ class DatabaseLoader(ABC):
 
 class Reader(DatabaseLoader):
     """Класс тестирования нагрузки на чтения."""
+
     def __init__(
         self,
         sql: str,
@@ -89,6 +88,7 @@ class Reader(DatabaseLoader):
 
 class Writer(DatabaseLoader):
     """Класс тестирования нагрузки на запись."""
+
     def __init__(
         self,
         file_name: str,
