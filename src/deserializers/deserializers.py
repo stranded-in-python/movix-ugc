@@ -2,6 +2,7 @@ from pydantic import BaseModel
 
 from .abc import Deserializer
 
+
 class KafkaDeserializer(Deserializer):
     async def deserialize(self, model: BaseModel) -> dict[str, str | bytes]:
         raw_dict = model.dict()

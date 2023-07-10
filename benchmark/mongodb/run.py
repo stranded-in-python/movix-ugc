@@ -1,7 +1,13 @@
 from multiprocessing import Process
-from pymongo import MongoClient, database
 
-from utils import timing, generate_random_likes, generate_random_bookmarks, generate_random_reviews
+from pymongo import MongoClient
+from utils import (
+    generate_random_bookmarks,
+    generate_random_likes,
+    generate_random_reviews,
+    timing,
+)
+
 
 class MongoTester:
     def __init__(self, client: MongoClient = MongoClient("localhost", 27017)):
@@ -10,10 +16,11 @@ class MongoTester:
         self.batch_size = 1000
         self.rows_number = 10_000_000
         self.collections_to_test = {
-            "likes": generate_random_likes, 
-            "bookmarks": generate_random_bookmarks, 
-            "reviews": generate_random_reviews}
-        
+            "likes": generate_random_likes,
+            "bookmarks": generate_random_bookmarks,
+            "reviews": generate_random_reviews,
+        }
+
     def _after_testing(self):
         self.client.drop_database("test_database")
 
@@ -30,48 +37,48 @@ class MongoTester:
         self._after_testing()
 
     @timing
-    def check_write_likes(self, ):
+    def check_write_likes(self):
         collection = self.db.likes
         batch = next(generate_random_likes())
         collection.insert_many(batch)
         print(f"Inserted {self.batch_size} rows")
 
     @timing
-    def check_write_bookmarks(self, ):
+    def check_write_bookmarks(self):
         collection = self.db.bookmarks
         batch = next(generate_random_bookmarks())
         collection.insert_many(batch)
         print(f"Inserted {self.batch_size} rows")
 
     @timing
-    def check_write_reviews(self, ):
+    def check_write_reviews(self):
         collection = self.db.reviews
         batch = next(generate_random_reviews())
         collection.insert_many(batch)
         print(f"Inserted {self.batch_size} rows")
 
     @timing
-    def check_read_likes(self, ):
+    def check_read_likes(self):
         collection = self.db.likes
-        data = [doc for doc in collection.find(limit=self.batch_size)]
+        data = [doc for doc in collection.find(limit=self.batch_size)]  # noqa: F841
         print(f"Selected {self.batch_size} rows")
         # print(f"Sample Data: {data[0]}")
 
     @timing
-    def check_read_bookmarks(self, ):
+    def check_read_bookmarks(self):
         collection = self.db.bookmarks
-        data = [doc for doc in collection.find(limit=self.batch_size)]
+        data = [doc for doc in collection.find(limit=self.batch_size)]  # noqa: F841
         print(f"Selected {self.batch_size} rows")
         # print(f"Sample Data: {data[0]}")
 
     @timing
-    def check_read_reviews(self, ):
+    def check_read_reviews(self):
         collection = self.db.reviews
-        data = [doc for doc in collection.find(limit=self.batch_size)]
+        data = [doc for doc in collection.find(limit=self.batch_size)]  # noqa: F841
         print(f"Selected {self.batch_size} rows")
         # print(f"Sample Data: {data[0]}")
 
-    def _just_write_rows(self,):
+    def _just_write_rows(self):
         client = MongoClient("localhost", 27017)
         db = client.test_database
         for coll, func in self.collections_to_test.items():
@@ -79,18 +86,17 @@ class MongoTester:
             for batch in func():
                 collection.insert_many(batch)
 
-    def _check_read(self,):
+    def _check_read(self):
         self.check_read_likes()
         self.check_read_bookmarks()
         self.check_read_reviews()
 
-
-    def _check_write(self,):
+    def _check_write(self):
         self.check_write_likes()
         self.check_write_bookmarks()
         self.check_write_reviews()
 
-    def _check_read_and_write(self,):
+    def _check_read_and_write(self):
         self._check_read()
         self._check_write()
 
@@ -102,6 +108,7 @@ class MongoTester:
         test.start()
         noise.join()
         test.join()
+
 
 if __name__ == "__main__":
     tester = MongoTester()

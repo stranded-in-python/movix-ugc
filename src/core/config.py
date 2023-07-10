@@ -1,6 +1,6 @@
 import os
 
-from pydantic import BaseSettings, Field
+from pydantic import BaseSettings, Field, SecretStr
 
 
 class ModelConfig:
@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     ch_table: str = Field("watching_movies", env="CLICKHOUSE_TABLE")
     ch_username: str = Field("user1", env="CLICKHOUSE_USERNAME")
     ch_password: str = Field("pass1", env="CLICKHOUSE_PASSWORD")
+
+    access_token_secret: SecretStr = SecretStr('ACCESS')
+    access_token_audience: str = 'movix:auth'
+
+    auth_user_rights_endpoint: str = 'http://auth:8000/api/v1/users/user_id/roles'
 
     @property
     def kafka_server(self):

@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from deserializers.deserializers import Deserializer
 from storages.storages import StorageABC
 
+
 class EventSerializerManager(ABC):
     def __init__(self, deserializer: Deserializer, storage: StorageABC):
         self.deserializer = deserializer
