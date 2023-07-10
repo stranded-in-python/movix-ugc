@@ -1,15 +1,8 @@
-from abc import ABC
-from typing import Any
-
 from pydantic import BaseModel
 
+from .abc import Deserializer
 
-class BrokerDeserializer(ABC):
-    async def deserialize(self, model: BaseModel) -> dict[Any, str]:
-        ...
-
-
-class KafkaDeserializer(BrokerDeserializer):
+class KafkaDeserializer(Deserializer):
     async def deserialize(self, model: BaseModel) -> dict[str, str | bytes]:
         raw_dict = model.dict()
         deserialized_dict = {}
