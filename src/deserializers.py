@@ -10,7 +10,7 @@ class BrokerDeserializer(ABC):
 
 
 class KafkaDeserializer(BrokerDeserializer):
-    async def deserialize(self, model: BaseModel) -> dict[Any, str]:
+    async def deserialize(self, model: BaseModel) -> dict[str, str | bytes]:
         raw_dict = model.dict()
         deserialized_dict = {}
         deserialized_dict["key_binary"] = str(raw_dict.get("id")).encode("ascii")

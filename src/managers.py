@@ -32,7 +32,7 @@ class ViewSerializerManager(EventSerializerManager):
         self.deserializer = deserializer
         self.storage = storage
 
-    async def _deserialize(self, pydantic_model: BasicViewEvent) -> dict[Any, str]:
+    async def _deserialize(self, pydantic_model: BasicViewEvent) -> dict[str, Any]:
         return await self.deserializer.deserialize(pydantic_model)
 
     async def save_to_storage(self, pydantic_model: BasicViewEvent) -> bool:
