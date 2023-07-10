@@ -6,7 +6,7 @@ from deserializers.abc import Deserializer
 from deserializers.deserializers import KafkaDeserializer
 from .abc import EventSerializerManager
 from models.models import BasicViewEvent
-from storages.storages import KafkaStorage, StorageABC
+from storages.storages import StorageABC, get_kafka_instance
 
 logger()
 
@@ -26,5 +26,5 @@ class ViewSerializerManager(EventSerializerManager):
 @lru_cache
 def get_view_manager() -> ViewSerializerManager:
     return ViewSerializerManager(
-        deserializer=KafkaDeserializer(), storage=KafkaStorage()
+        deserializer=KafkaDeserializer(), storage=get_kafka_instance()
     )

@@ -2,6 +2,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Any
 
+import asyncio
 import msgpack
 from aiokafka import AIOKafkaProducer
 
@@ -18,24 +19,24 @@ class StorageABC(ABC):
 
 class KafkaStorage(StorageABC):
 
-    async def get_producer(self) -> None:
+    @classmethod
+    async def create(cls):
+        self = KafkaStorage()
         self.producer = AIOKafkaProducer(
             bootstrap_servers=f"{settings.kafka_host}:{settings.kafka_port}",
             value_serializer=msgpack.dumps)
-        try:
-            await self.producer.start()
-        except Exception as e:
-            logging.exception("Failed to connect to broker:%s" % e)
-
+        await self.producer.start()
+        return self
+    
     async def save(self, topic: str, obj: dict[str, Any]) -> bool:
         key = obj.pop("key_binary")
         try:
             await self.producer.send(topic=topic, key=key, value=obj)
             return True
-        except AttributeError:
-            await self.get_producer()
-            await self.producer.send(topic=topic, key=key, value=obj)
-            return True
         except Exception as e:
             logging.exception("Failed to send to broker:%s" % e)
             return False
+
+def get_kafka_instance() -> KafkaStorage:
+    instance = asyncio.run(KafkaStorage.create())
+    return instance
