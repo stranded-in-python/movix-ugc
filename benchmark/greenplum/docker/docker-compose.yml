@@ -1,0 +1,23 @@
+version: "3.8"
+
+name: "greenplum_benchmark"
+
+services:
+
+  greenplum:
+    image: andruche/greenplum:6.24.1
+    hostname: greenplum
+    container_name: greenplum    
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/entrypoint.sh:/entrypoint.sh
+
+  benchmark:
+    hostname: benchmark
+    container_name: benchmark
+    build:
+      context: ../app
+      dockerfile: Dockerfile
+    depends_on:
+      - greenplum

@@ -13,9 +13,10 @@ class Timer(ContextDecorator):
     """Time your code using a class, context manager, or decorator"""
 
     total: int = 0
-    name: Optional[str] = "Timer"
+    name: str = "Timer"
     text: str = "Elapsed time: {:0.4f} seconds"
     logger: Optional[Callable[[str], None]] = print
+    logg_steps: bool = False
     _start_time: Optional[float] = field(default=None, init=False, repr=False)
 
     def start(self) -> None:
@@ -32,16 +33,19 @@ class Timer(ContextDecorator):
 
         # Calculate elapsed time
         elapsed_time = time.perf_counter() - self._start_time
+        self.total += elapsed_time
+
         self._start_time = None
 
         # Report elapsed time
-        if self.logger:
+        if self.logger and self.logg_steps:
             self.logger(self.text.format(elapsed_time) + f" [{self.name}]")
-        if self.name:
-            # self.timers[self.name] += elapsed_time
-            self.total += elapsed_time
-
+            
         return elapsed_time
+
+    def logging_summary(self):
+        """Выведем общее потраченное время."""
+        self.logger(f"Total time for {self.name} is {self.total}")
 
     def __enter__(self) -> "Timer":
         """Start a new timer as a context manager"""
@@ -51,12 +55,3 @@ class Timer(ContextDecorator):
     def __exit__(self, *exc_info: Any) -> None:
         """Stop the context manager timer"""
         self.stop()
-
-    def __del__(self):
-        # Данный метод вызывается несколько раз
-        # Причем лишь один раз с текущими значениями полей
-        # А в остальных с дефолтными
-
-        # В конце выведем тотал
-        if self.total > 0:
-            self.logger(f"Total time for {self.name}: {self.total}")
