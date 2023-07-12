@@ -5,39 +5,36 @@ from contextlib import contextmanager
 from typing import Generator
 
 import clickhouse_connect
+import confluent_kafka
 import pendulum
+import storage
 from backoff import on_exception
 from clickhouse_connect.driver import Client
 from clickhouse_connect.driver.exceptions import ClickHouseError
 from clickhouse_connect.driver.tools import insert_file
-from confluent_kafka import Consumer as KafkaConsumer
-from confluent_kafka import KafkaError, KafkaException
-from confluent_kafka import Message as KafkaMessage
-from confluent_kafka import TopicPartition
 from logger import logger
-from state import Storage
 from utils import json_decoder
 
-from models import Message, Settings
+from core import Settings
+from models import Message
 
 
 class Executer:
     """Управление процессом ETL из Kafka в Clickhouse."""
 
-    def __init__(self):
-        self._settings = Settings()
+    def __init__(self, settings: Settings, offset_storage: storage.BaseStorage):
+        self._settings = settings
         self._data_filename = 'data.csv'
         self._column_names = tuple(Message.__fields__.keys())
-
-        self._offset_storage = Storage(
-            f"movix:ugc:etl:{self._settings.topic}",
-            self._settings.redis_host,
-            self._settings.redis_port,
-        )
+        self._offset_storage = offset_storage
         # Словарь будет хранить офсеты прочитанных партиций
         self._partitions: dict[int, int] = defaultdict(int)
 
-    def _assign(self, consumer: KafkaConsumer, partitions: list[TopicPartition]):
+    def _assign(
+        self,
+        consumer: confluent_kafka.Consumer,
+        partitions: list[confluent_kafka.TopicPartition],
+    ):
         """Callback на изменения назначений партиций."""
         for partition in partitions:
             logger.info(f"Assign partition: {partition.partition}")
@@ -46,9 +43,9 @@ class Executer:
         consumer.assign(partitions)
 
     @contextmanager
-    def _get_consumer(self) -> Generator[KafkaConsumer, None, None]:
+    def _get_consumer(self) -> Generator[confluent_kafka.Consumer, None, None]:
         """Инициализация и возврат консьюмера."""
-        consumer = KafkaConsumer(
+        consumer = confluent_kafka.Consumer(
             {
                 'bootstrap.servers': self._settings.kafka_server,
                 'group.id': self._settings.group_id,
@@ -96,7 +93,7 @@ class Executer:
             + '\n'
         )
 
-    def _messages_to_csv(self, messages: list[KafkaMessage]):
+    def _messages_to_csv(self, messages: list[confluent_kafka.Message]):
         """Сохранение и проверка сообщений."""
         with open(self._data_filename, 'wt') as csv:
             for message in messages:
@@ -121,7 +118,7 @@ class Executer:
         for partition, offset in self._partitions.items():
             self._offset_storage.save(partition, offset)
 
-    def _process_messages(self, messages: list[KafkaMessage]):
+    def _process_messages(self, messages: list[confluent_kafka.Message]):
         """Отправка сообщений в clickhouse и сохранение офсетов."""
         if messages:
             self._messages_to_csv(messages)
@@ -139,19 +136,19 @@ class Executer:
             database=self._settings.ch_db,
         )
 
-    def _no_error(self, msg: KafkaMessage):
+    def _no_error(self, msg: confluent_kafka.Message):
         """Сообщаем об отсутствии ошибок при чтении сообщения."""
         err = msg.error()
         if err:
-            if err.code() != KafkaError._PARTITION_EOF:
-                raise KafkaException(msg.error())
+            if err.code() != confluent_kafka.KafkaError._PARTITION_EOF:
+                raise confluent_kafka.KafkaException(msg.error())
         return True
 
     def run(self):
         """Запуск цикла процесса ETL."""
-        consumer: KafkaConsumer
-        msg: KafkaMessage
-        messages: list[KafkaMessage] = []
+        consumer: confluent_kafka.Consumer
+        msg: confluent_kafka.Message
+        messages: list[confluent_kafka.Message] = []
         timeout_seconds = self._settings.batch_timeout
 
         with self._get_consumer() as consumer:
@@ -194,5 +191,11 @@ class Executer:
 
 
 if __name__ == '__main__':
-    exec = Executer()
-    exec.run()
+    settings = Settings()
+    executer = Executer(
+        settings=settings,
+        offset_storage=storage.RedisStorage(
+            settings.redis_key_prefix, settings.redis_host, settings.redis_port
+        ),
+    )
+    executer.run()

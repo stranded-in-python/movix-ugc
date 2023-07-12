@@ -2,8 +2,10 @@ import redis
 from backoff import on_exception
 from logger import logger
 
+from .base import BaseStorage
 
-class Storage:
+
+class RedisStorage(BaseStorage):
     def __init__(self, base_key: str, host: str, port: int, db: int = 0):
         self._redis = redis.Redis(host=host, port=port, db=db, decode_responses=True)
         self.key = base_key
@@ -12,8 +14,8 @@ class Storage:
         return f"{self.key}:{str(partition)}"
 
     @on_exception(redis.ConnectionError, logger)
-    def save(self, partition: int, value: int):
-        self._redis.set(self._gen_key(partition), value)
+    def save(self, partition: int, offset: int) -> None:
+        self._redis.set(self._gen_key(partition), offset)
 
     @on_exception(redis.ConnectionError, logger)
     def retrieve(self, partition: int) -> int:

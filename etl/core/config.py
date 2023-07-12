@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     kafka_port: str = Field("9092", env="KAFKA_PORT")
     redis_host: str = Field("localhost", env="REDIS_HOST")
     redis_port: int = Field(6379, env="REDIS_PORT")
+    redis_base_key: str = Field("movix:ugc:etl", env="REDIS_BASE_KEY")
     group_id: str = Field("group_watching_movies", env="KAFKA_GROUP_ID")
     topic: str = Field("watching_movies", env="KAFKA_TOPIC")
     batch_timeout: int = Field(10, env="BATCH_TIMEOUT")  # in sec
@@ -30,6 +31,10 @@ class Settings(BaseSettings):
     @property
     def kafka_server(self):
         return f"{self.kafka_host}:{self.kafka_port}"
+
+    @property
+    def redis_key_prefix(self):
+        return f"{self.redis_base_key}:{self.topic}"
 
     base_dir = os.path.dirname(os.path.dirname(__file__))
 
