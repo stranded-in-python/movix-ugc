@@ -6,19 +6,15 @@ from typing import Any
 import msgpack
 from aiokafka import AIOKafkaProducer
 
+from .abc import BrokerABC
 from core.config import settings
 from core.logger import logger
 
 logger()
 
+# переименовать бы файл в brokers
 
-class StorageABC(ABC):
-    @abstractmethod
-    async def save(obj: dict[Any]):
-        ...
-
-
-class KafkaStorage(StorageABC):
+class KafkaStorage(BrokerABC):
     @classmethod
     async def create(cls):
         self = KafkaStorage()
