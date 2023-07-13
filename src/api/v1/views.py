@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from auth.users import get_current_user
 from broker_managers.views import ViewSerializerManager, get_view_manager
-from models.models import BasicViewEvent, UserViewEvent
+from models.models import UserViewEvent
 
 router = APIRouter()
 
