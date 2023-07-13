@@ -4,11 +4,11 @@ from typing import Any
 from pydantic import BaseModel
 
 from deserializers.deserializers import Deserializer
-from storages.storages import StorageABC
+from storages.brokers import BrokerABC
 
 
 class EventSerializerManager(ABC):
-    def __init__(self, deserializer: Deserializer, storage: StorageABC):
+    def __init__(self, deserializer: Deserializer, storage: BrokerABC):
         self.deserializer = deserializer
         self.storage = storage
 

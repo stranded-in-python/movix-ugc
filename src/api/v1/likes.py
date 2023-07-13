@@ -2,8 +2,8 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from managers.users import get_current_user
-from managers.views import ViewSerializerManager, get_view_manager
+from auth.users import get_current_user
+from broker_managers.views import ViewSerializerManager, get_view_manager
 from models.likes import FilmLikes, FilmAverageScore, FilmEditScore
 
 router = APIRouter()
@@ -14,7 +14,7 @@ router = APIRouter()
 )
 async def get_likes(
     film_id: UUID,
-    like_service: #chto-to = Depends(some callable)
+    # like_service: chto-to = Depends(some callable)
     ) -> FilmLikes:
     pass
 
@@ -23,7 +23,7 @@ async def get_likes(
 )
 async def get_likes(
     film_id: UUID,
-    like_service: #chto-to = Depends(some callable)
+    # like_service: chto-to = Depends(some callable)
     ) -> FilmAverageScore:
     pass
 
@@ -33,6 +33,6 @@ async def get_likes(
 )
 async def get_likes(
     film_id: UUID,
-    like_service: #chto-to = Depends(some callable)
+    # like_service: chto-to = Depends(some callable)
     ) -> FilmEditScore:
     pass
