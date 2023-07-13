@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from uuid import UUID
 from typing import Any
 
 
@@ -10,5 +11,5 @@ class BrokerABC(ABC):
 
 class StorageABC(ABC):
     @abstractmethod
-    async def get_by_id(self):
+    async def get_by_id(self, id: UUID):
         ...
