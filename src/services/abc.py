@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from uuid import UUID
 
-from models.likes import FilmLikes, FilmAverageScore, FilmEditScore
+from models.likes import FilmLikes, FilmAverageScore, FilmEditScore, DeletedFilm
 
 class LikeServiceABC(ABC):
     @abstractmethod
@@ -16,4 +16,7 @@ class LikeServiceABC(ABC):
     async def edit_film_score(self, user_id: UUID, film_id: UUID, score: int) -> FilmEditScore:
         ...
 
+    @abstractmethod
+    async def delete_film_score(self, user_id: UUID, film_id: UUID) -> DeletedFilm:
+        ...
 # и здесь пошли другие

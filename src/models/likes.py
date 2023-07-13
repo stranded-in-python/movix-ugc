@@ -15,3 +15,7 @@ class FilmAverageScore(FilmIDMixin):
 class FilmEditScore(FilmIDMixin):
     user_id: UUID
     score: int
+
+
+class DeletedFilm(FilmIDMixin):
+    pass

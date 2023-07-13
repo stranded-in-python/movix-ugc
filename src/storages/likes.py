@@ -9,4 +9,5 @@ class LikeStorage(StorageABC):
         self.manager = manager
 
     async def get_by_id(self, film_id: UUID):
-        await self.manager.get_by_id(film_id)
+        await self.manager.get(film_id)
+    
