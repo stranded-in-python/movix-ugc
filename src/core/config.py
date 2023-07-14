@@ -32,7 +32,7 @@ class Settings(BaseSettings):
 
     mongo_host: str = Field("localhost", env="MONGO_HOST")
     mongo_port: int = Field(27017, env="MONGO_PORT")
-    mongo_db_name: str = Field("ugc", env="MONGO_DB_NAME")
+    mongo_db_name: str = Field("test_database", env="MONGO_DB_NAME")
 
     @property
     def kafka_server(self):

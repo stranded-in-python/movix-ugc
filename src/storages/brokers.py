@@ -5,13 +5,15 @@ from typing import Any
 import msgpack
 from aiokafka import AIOKafkaProducer
 
-from .abc import BrokerABC
 from core.config import settings
 from core.logger import logger
+
+from .abc import BrokerABC
 
 logger()
 
 # переименовать бы файл в brokers
+
 
 class KafkaBroker(BrokerABC):
     @classmethod

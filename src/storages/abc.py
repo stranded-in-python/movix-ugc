@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from uuid import UUID
 from typing import Any
+from uuid import UUID
 
 
 class BrokerABC(ABC):
@@ -11,5 +11,5 @@ class BrokerABC(ABC):
 
 class StorageABC(ABC):
     @abstractmethod
-    async def get_by_id(self, id: UUID):
+    async def get_average_score(self, id: UUID):
         ...

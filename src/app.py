@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
-from api.v1 import views
+from api.v1 import likes, views
 from core.config import settings
 
 app = FastAPI(
@@ -12,3 +12,4 @@ app = FastAPI(
 )
 
 app.include_router(views.router, prefix="/api/v1/ugc/events", tags=["Views"])
+app.include_router(likes.router, prefix="/api/v1/ugc", tags=["UGC"])

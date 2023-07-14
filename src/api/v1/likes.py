@@ -1,59 +1,57 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 
-from auth.users import get_current_user
-from broker_managers.views import ViewSerializerManager, get_view_manager
-from models.likes import FilmLikes, FilmAverageScore, FilmEditScore, DeletedFilm
+from models.likes import FilmAverageScore, FilmEditScore, FilmLikes
+from services.likes import LikeServiceABC, get_like_service
 
 router = APIRouter()
 
 
-@router.get(
-    "/film-likes/",
-)
+@router.get("/film-likes/")
 async def get_likes(
-    film_id: UUID,
-    # like_service: chto-to = Depends(some callable)
-    ) -> FilmLikes:
+    film_id: UUID, like_service: LikeServiceABC = Depends(get_like_service)
+) -> FilmLikes:
     pass
 
-@router.get(
-    "/film-average/",
-)
+
+@router.get("/film-average/")
 async def get_average_score(
-    film_id: UUID,
-    # like_service: chto-to = Depends(some callable)
-    ) -> FilmAverageScore:
-    pass
+    film_id: UUID, like_service: LikeServiceABC = Depends(get_like_service)
+) -> FilmAverageScore:
+    average_score = await like_service.get_average_score_by_id(film_id)
+    if not average_score:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="film not found"
+        )
+    return average_score
 
-@router.post(
-    "/movie-score/",
-)
-async def get_l(
-    film_id: UUID,
-    user_id: UUID,
-    score: int
-    # like_service: chto-to = Depends(some callable)
-    ) -> FilmEditScore:
-    pass
 
-@router.patch(
-    "/movie-score/",
-)
-async def get_l(
+@router.post("/movie-score/")
+async def post_score(
     film_id: UUID,
     user_id: UUID,
-    score: int
-    # like_service: chto-to = Depends(some callable)
-    ) -> FilmEditScore:
+    score: int,
+    like_service: LikeServiceABC = Depends(get_like_service),
+) -> FilmEditScore:
     pass
 
-@router.delete(
-    "/movie-score/",
-)
-async def get_l(
-    film_id: UUID
-    # like_service: chto-to = Depends(some callable)
-    ) -> DeletedFilm:
+
+@router.patch("/movie-score/")
+async def edit_score(
+    film_id: UUID,
+    user_id: UUID,
+    score: int,
+    like_service: LikeServiceABC = Depends(get_like_service),
+) -> FilmEditScore:
     pass
+
+
+@router.delete("/movie-score/", response_model=None)
+async def delete_score(
+    film_id: UUID,
+    user_id: UUID,
+    like_service: LikeServiceABC = Depends(get_like_service),
+) -> Response(status_code=status.HTTP_200_OK):
+    await like_service.delete_film_score(user_id, film_id)
+    return Response(status_code=status.HTTP_200_OK)

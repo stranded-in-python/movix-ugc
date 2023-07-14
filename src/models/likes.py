@@ -1,8 +1,7 @@
 from uuid import UUID
 
-from pydantic import BaseModel
-
 from .mixins import FilmIDMixin
+
 
 class FilmLikes(FilmIDMixin):
     likes: int

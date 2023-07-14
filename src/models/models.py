@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from .mixins import UUIDMixin, FilmIDMixin
+from .mixins import FilmIDMixin, UUIDMixin
 
 
 class User(UUIDMixin, FilmIDMixin):
