@@ -12,7 +12,12 @@ router = APIRouter()
 async def get_likes(
     film_id: UUID, like_service: LikeServiceABC = Depends(get_like_service)
 ) -> FilmLikes:
-    pass
+    likes_and_dislikes = await like_service.get_likes(film_id)
+    if not likes_and_dislikes:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="film not found"
+        )
+    return likes_and_dislikes
 
 
 @router.get("/film-average/")
@@ -34,7 +39,7 @@ async def post_score(
     score: int,
     like_service: LikeServiceABC = Depends(get_like_service),
 ) -> FilmEditScore:
-    pass
+    return await like_service.insert_film_score(user_id, film_id, score)
 
 
 @router.patch("/movie-score/")
@@ -44,7 +49,7 @@ async def edit_score(
     score: int,
     like_service: LikeServiceABC = Depends(get_like_service),
 ) -> FilmEditScore:
-    pass
+    return await like_service.insert_film_score(user_id, film_id, score)
 
 
 @router.delete("/movie-score/", response_model=None)

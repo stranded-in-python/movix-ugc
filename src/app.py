@@ -12,4 +12,4 @@ app = FastAPI(
 )
 
 app.include_router(views.router, prefix="/api/v1/ugc/events", tags=["Views"])
-app.include_router(likes.router, prefix="/api/v1/ugc", tags=["UGC"])
+app.include_router(likes.router, prefix="/api/v1/ugc", tags=["Likes/Score"])

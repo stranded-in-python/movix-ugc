@@ -6,9 +6,12 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.results import InsertOneResult
 
 from core.config import settings
+from core.logger import logger
 
 from .abc import DBClient, MongoDBManagerABC
 
+
+logger()
 
 class MongoDBClient(AsyncIOMotorClient, DBClient):
     """Обёртка для Mongodb"""
@@ -36,7 +39,13 @@ class MongoDBManager(MongoDBManagerABC):
         return await self.get_client()[settings.mongo_db_name][collection].find_one(
             *args, **kwargs
         )
+# likes.find_one({'user_id': 'f158bd08-975d-4ac1-8f7d-c07c9a053c13', 'movie_id': 'bb1a3666-dac1-4f7c-bcdd-95df42609d48'})
 
+# print(likes.update_one({'user_id': 'f158bd08-975d-4ac1-8f7d-c07c9a053c13', 'movie_id': 'bb1a3665-dac1-4f7c-bcdd-95df42609d48'}, {'$set': {'score': 7}}, upsert=True))
+
+
+# print([doc for doc in likes.find({"$and": [{ 'movie_id': { '$eq': "89b13f05-dce8-4966-a6d8-6324102c6ba8" } }, {'user_id': {'$eq': '67274148-5798-4b04-9f42-78f339ac62c'}}]})])
+# print(likes.find_one({"$and": [{ 'movie_id': "89b13f05-dce8-4966-a6d8-6324102c6ba8" } , {'user_id': '67274148-5798-4b04-9f42-78f339ac62c'}]})
     # async def insert(self, collection: str, document: RawBSONDocument) -> InsertOneResult:
     # return await self.get_client()[settings.mongo_db_name][collection].insert_one(document)
 
@@ -49,11 +58,13 @@ class MongoDBManager(MongoDBManagerABC):
 
     # insert + update
     async def upsert(
-        self, collection: str, document: RawBSONDocument
+        self, collection: str, filters: dict[str, Any], document: dict[str, Any]
     ) -> InsertOneResult:
-        return await self.get_client()[settings.mongo_db_name][collection].update_one(
-            document, {'$set': document}, upsert=True
+        # данная конструкция создаст документ, если его нет и апдейтнет его в противном случае (параметр upsert)
+        await self.get_client()[settings.mongo_db_name][collection].update_one(
+            filters, {'$set': document}, upsert=True
         )
+        
 
     async def get_average(
         self, collection: str, field: str, field_id: str, id: str
@@ -70,6 +81,18 @@ class MongoDBManager(MongoDBManagerABC):
         except IndexError:
             return None
         # [{'_id': 'movie_id', 'avg_val': 9.0}]
+
+    async def get_count(
+        self, collection: str, document: RawBSONDocument
+    ) -> dict[str, int]:
+        col = self.get_client()[settings.mongo_db_name][collection]
+        result = await col.aggregate(
+            [{"$match": document}, {"$count": "count"}]
+        ).to_list(length=1)
+        try:
+            return result[0]  # {'count': 1}
+        except IndexError:
+            return {'count': 0}
 
     async def delete(self, collection: str, document: dict[str, Any]) -> None:
         col = self.get_client()[settings.mongo_db_name][collection]

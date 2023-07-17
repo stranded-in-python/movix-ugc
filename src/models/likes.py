@@ -5,6 +5,7 @@ from .mixins import FilmIDMixin
 
 class FilmLikes(FilmIDMixin):
     likes: int
+    dislikes: int
 
 
 class FilmAverageScore(FilmIDMixin):
