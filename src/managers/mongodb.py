@@ -13,6 +13,7 @@ from .abc import DBClient, MongoDBManagerABC
 logger()
 
 
+
 class MongoDBClient(AsyncIOMotorClient, DBClient):
     """Обёртка для Mongodb"""
 
@@ -35,10 +36,8 @@ class MongoDBManager(MongoDBManagerABC):
         return await self._client.admin.command('ping')
         # {'ok': 1.0}
 
-    async def get(self, collection: str, *args, **kwargs) -> _DocumentType | None:
-        return await self.get_client()[settings.mongo_db_name][collection].find_one(
-            *args, **kwargs
-        )
+    async def get(self, collection: str, *args) -> list[dict[str, Any]] | None:
+        return await self.get_client()[settings.mongo_db_name][collection].find(*args).to_list(length=None)
 
     # likes.find_one({'user_id': 'f158bd08-975d-4ac1-8f7d-c07c9a053c13', 'movie_id': 'bb1a3666-dac1-4f7c-bcdd-95df42609d48'})
 
@@ -61,9 +60,10 @@ class MongoDBManager(MongoDBManagerABC):
         self, collection: str, filters: dict[str, Any], document: dict[str, Any]
     ) -> InsertOneResult:
         # данная конструкция создаст документ, если его нет и апдейтнет его в противном случае (параметр upsert)
-        await self.get_client()[settings.mongo_db_name][collection].update_one(
+        result = await self.get_client()[settings.mongo_db_name][collection].update_one(
             filters, {'$set': document}, upsert=True
         )
+        return result
 
     async def get_average(
         self, collection: str, field: str, field_id: str, id: UUID

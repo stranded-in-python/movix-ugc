@@ -15,7 +15,7 @@ class LikeStorage(StorageABC):
         self.movie_id_field = 'movie_id'
         self.user_id_field = 'user_id'
 
-    async def get_average_score(self, film_id: UUID):
+    async def get_average_score(self, film_id: UUID) -> FilmAverageScore:
         result = await self.manager().get_average(
             self.collection, self.score_field, self.movie_id_field, film_id
         )

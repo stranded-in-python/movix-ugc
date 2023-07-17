@@ -10,6 +10,4 @@ class BrokerABC(ABC):
 
 
 class StorageABC(ABC):
-    @abstractmethod
-    async def get_average_score(self, id: UUID):
-        ...
+    pass

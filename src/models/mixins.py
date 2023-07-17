@@ -8,4 +8,4 @@ class UUIDMixin(BaseModel):
 
 
 class FilmIDMixin(BaseModel):
-    film_id: UUID
+    film_id: UUID # = Field(alias='movie_id')

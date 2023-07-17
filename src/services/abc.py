@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from uuid import UUID
 
 from models.likes import FilmAverageScore, FilmEditScore, FilmLikes
-
+from models.bookmarks import Bookmark, ShortBookmark
 
 class LikeServiceABC(ABC):
     @abstractmethod
@@ -30,4 +30,18 @@ class LikeServiceABC(ABC):
         ...
 
 
-# и здесь пошли другие
+class BookmarkServiceABC(ABC):
+    async def insert_bookmark(
+            self, user_id: UUID, film_id: UUID 
+    ) -> Bookmark:
+        ...
+
+    async def delete_bookmark(
+            self, user_id: UUID, film_id: UUID
+    ) -> Bookmark:
+        ...
+    
+    async def get_bookmarks(
+            self, user_id: UUID
+    ) -> list[ShortBookmark]:
+        ...
