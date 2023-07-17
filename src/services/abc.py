@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from uuid import UUID
 
-from models.likes import DeletedFilm, FilmAverageScore, FilmEditScore, FilmLikes
+from models.likes import FilmAverageScore, FilmEditScore, FilmLikes
 
 
 class LikeServiceABC(ABC):

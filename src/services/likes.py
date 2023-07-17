@@ -16,7 +16,9 @@ class LikeService(LikeServiceABC):
     async def get_average_score_by_id(self, film_id: UUID) -> FilmAverageScore | None:
         return await self.storage.get_average_score(film_id)
 
-    async def insert_film_score(self, user_id: UUID, film_id: UUID, score: int) -> FilmEditScore:
+    async def insert_film_score(
+        self, user_id: UUID, film_id: UUID, score: int
+    ) -> FilmEditScore:
         await self.storage.insert_film_score(user_id, film_id, score)
         return FilmEditScore(film_id=film_id, user_id=user_id, score=score)
 
@@ -31,7 +33,7 @@ class LikeService(LikeServiceABC):
             user_id, film_id
         )  # не вижу смысла что-то возвращать
 
-    async def get_likes(self, film_id: UUID):
+    async def get_likes(self, film_id: UUID) -> FilmLikes:
         return await self.storage.get_likes(film_id)
 
 
