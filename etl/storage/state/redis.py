@@ -1,11 +1,10 @@
 import redis
-from backoff import on_exception
-from logger import logger
+from utils import logger, on_exception
 
-from .base import BaseStorage
+from .base import BaseState
 
 
-class RedisStorage(BaseStorage):
+class RedisState(BaseState):
     def __init__(self, base_key: str, host: str, port: int, db: int = 0):
         self._redis = redis.Redis(host=host, port=port, db=db, decode_responses=True)
         self.key = base_key

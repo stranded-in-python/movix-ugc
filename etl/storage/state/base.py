@@ -1,7 +1,7 @@
 import abc
 
 
-class BaseStorage:
+class BaseState:
     @abc.abstractmethod
     def save(self, partition: int, offset: int) -> None:
         """Сохранить офсет партиции в постоянное хранилище"""

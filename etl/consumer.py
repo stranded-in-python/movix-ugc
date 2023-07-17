@@ -8,12 +8,10 @@ import clickhouse_connect
 import confluent_kafka
 import pendulum
 import storage
-from backoff import on_exception
 from clickhouse_connect.driver import Client
 from clickhouse_connect.driver.exceptions import ClickHouseError
 from clickhouse_connect.driver.tools import insert_file
-from logger import logger
-from utils import json_decoder
+from utils import json_decoder, logger, on_exception
 
 from core import Settings
 from models import Message
