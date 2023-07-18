@@ -49,21 +49,28 @@ class ReviewStorage(StorageABC):
         return old_review[0]
 
     async def insert_review_score(self, user_id: UUID, review_id: UUID, score: int) -> ReviewLikes:
-        await self.manager().upsert(
+        upsert_result = await self.manager().upsert(
             self.review_score_collection,
             {self.user_id_field: user_id, self.review_id_field: review_id},
-            {
+            {"$set": {
                 self.user_id_field: user_id,
                 self.review_id_field: review_id,
                 self.score_field: score,
-            },
+            }},
         )
+        if upsert_result.modified_count != 0:
+            field_to_inc = self.likes_field if score == 10 else self.dislikes_field
+            field_to_dec = self.dislikes_field if score == 10 else self.likes_field
+            await self.manager().upsert(
+                self.review_collection,
+                {self.user_id_field: user_id, self.review_id_field: review_id},
+                {'$inc': {field_to_inc: +1, field_to_dec: -1}}
+            )
         return ReviewLikes(user_id=user_id, review_id=review_id, score=score)
-
-
 
     # async def get_reviews(self,):
     #     pass
+
 
 
 #     async def get_average_score(self, film_id: UUID) -> FilmAverageScore:

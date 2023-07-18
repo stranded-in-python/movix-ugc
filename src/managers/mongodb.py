@@ -61,12 +61,20 @@ class MongoDBManager(MongoDBManagerABC):
     #     # например update_one({'user_id': 'be19cf8d-4eb9-4fbd-a34f-71348e2dbd6b', 'score': 8}, {'$set': {'score': 7}})
 
     # insert + update
+    # async def upsert(
+    #     self, collection: str, filters: dict[str, Any], document: dict[str, Any]
+    # ) -> InsertOneResult:
+    #     # данная конструкция создаст документ, если его нет и апдейтнет его в противном случае (параметр upsert)
+    #     result = await self.get_client()[settings.mongo_db_name][collection].update_one(
+    #         filters, {'$set': document}, upsert=True
+    #     )
+    #     return result
+
     async def upsert(
-        self, collection: str, filters: dict[str, Any], document: dict[str, Any]
-    ) -> InsertOneResult:
+        self, collection: str, *args) -> InsertOneResult:
         # данная конструкция создаст документ, если его нет и апдейтнет его в противном случае (параметр upsert)
         result = await self.get_client()[settings.mongo_db_name][collection].update_one(
-            filters, {'$set': document}, upsert=True
+            *args, upsert=True
         )
         return result
 
