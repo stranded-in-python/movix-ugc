@@ -1,6 +1,7 @@
+from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Response, status
 
 from models.likes import FilmAverageScore, FilmEditScore, FilmLikes
 from services.likes import LikeServiceABC, get_like_service
@@ -36,7 +37,7 @@ async def get_average_score(
 async def post_score(
     film_id: UUID,
     user_id: UUID,
-    score: int,
+    score: Annotated[int, Path(title="Score of how you liked the movie", ge=1, le=10)],
     like_service: LikeServiceABC = Depends(get_like_service),
 ) -> FilmEditScore:
     return await like_service.insert_film_score(user_id, film_id, score)
@@ -46,7 +47,7 @@ async def post_score(
 async def edit_score(
     film_id: UUID,
     user_id: UUID,
-    score: int,
+    score: Annotated[int, Path(title="Score of how you liked the movie", ge=1, le=10)],
     like_service: LikeServiceABC = Depends(get_like_service),
 ) -> FilmEditScore:
     return await like_service.insert_film_score(user_id, film_id, score)

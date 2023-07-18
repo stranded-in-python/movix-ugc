@@ -1,7 +1,6 @@
 from typing import Any
 from uuid import UUID
 
-from bson.typings import _DocumentType
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.results import InsertOneResult
 
@@ -11,7 +10,6 @@ from core.logger import logger
 from .abc import DBClient, MongoDBManagerABC
 
 logger()
-
 
 
 class MongoDBClient(AsyncIOMotorClient, DBClient):
@@ -36,17 +34,26 @@ class MongoDBManager(MongoDBManagerABC):
         return await self._client.admin.command('ping')
 
     async def get(self, collection: str, *args) -> list[dict[str, Any]] | None:
-        return await self.get_client()[settings.mongo_db_name][collection].find(*args).to_list(length=None)
+        return (
+            await self.get_client()[settings.mongo_db_name][collection]
+            .find(*args)
+            .to_list(length=None)
+        )
 
-    async def get_and_sort(self, collection: str, sort_field: str, order: int, *args) -> list[dict[str, Any]] | None:
-        return await self.get_client()[settings.mongo_db_name][collection].find(*args).sort(sort_field, order).to_list(length=None)
+    async def get_and_sort(
+        self, collection: str, sort_field: str, order: int, *args
+    ) -> list[dict[str, Any]] | None:
+        return (
+            await self.get_client()[settings.mongo_db_name][collection]
+            .find(*args)
+            .sort(sort_field, order)
+            .to_list(length=None)
+        )
 
     async def insert(self, collection: str, *args):
         await self.get_client()[settings.mongo_db_name][collection].insert_one(*args)
 
-    async def upsert(
-        self, collection: str, *args) -> InsertOneResult:
-        # данная конструкция создаст документ, если его нет и апдейтнет его в противном случае (параметр upsert)
+    async def upsert(self, collection: str, *args) -> InsertOneResult:
         result = await self.get_client()[settings.mongo_db_name][collection].update_one(
             *args, upsert=True
         )
@@ -75,7 +82,7 @@ class MongoDBManager(MongoDBManagerABC):
             [{"$match": document}, {"$count": "count"}]
         ).to_list(length=1)
         try:
-            return result[0]  # {'count': 1}
+            return result[0]
         except IndexError:
             return {'count': 0}
 

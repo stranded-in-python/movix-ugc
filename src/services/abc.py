@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
 from uuid import UUID
 
-from models.likes import FilmAverageScore, FilmEditScore, FilmLikes
 from models.bookmarks import Bookmark, ShortBookmark
+from models.likes import FilmAverageScore, FilmEditScore, FilmLikes
 from models.reviews import Review, ReviewLikes
+
 
 class LikeServiceABC(ABC):
     @abstractmethod
@@ -33,31 +34,29 @@ class LikeServiceABC(ABC):
 
 class BookmarkServiceABC(ABC):
     @abstractmethod
-    async def insert_bookmark(
-            self, user_id: UUID, film_id: UUID 
-    ) -> Bookmark:
+    async def insert_bookmark(self, user_id: UUID, film_id: UUID) -> Bookmark:
         ...
 
     @abstractmethod
-    async def delete_bookmark(
-            self, user_id: UUID, film_id: UUID
-    ) -> Bookmark:
+    async def delete_bookmark(self, user_id: UUID, film_id: UUID) -> Bookmark:
         ...
 
     @abstractmethod
-    async def get_bookmarks(
-            self, user_id: UUID
-    ) -> list[ShortBookmark]:
+    async def get_bookmarks(self, user_id: UUID) -> list[ShortBookmark]:
         ...
 
 
 class ReviewServiceABC(ABC):
     @abstractmethod
-    async def insert_review(self, user_id: UUID, film_id: UUID, text: str, score: int) -> Review:
+    async def insert_review(
+        self, user_id: UUID, film_id: UUID, text: str, score: int
+    ) -> Review:
         ...
 
     @abstractmethod
-    async def insert_review_score(self, user_id: UUID, review_id: UUID, score: int) -> ReviewLikes:
+    async def insert_review_score(
+        self, user_id: UUID, review_id: UUID, score: int
+    ) -> ReviewLikes:
         ...
 
     @abstractmethod

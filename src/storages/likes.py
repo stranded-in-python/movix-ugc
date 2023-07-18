@@ -12,7 +12,7 @@ class LikeStorage(StorageABC):
         self.manager = manager
         self.collection = 'likes'
         self.score_field = 'score'
-        self.movie_id_field = 'movie_id'
+        self.movie_id_field = 'film_id'
         self.user_id_field = 'user_id'
 
     async def get_average_score(self, film_id: UUID) -> FilmAverageScore:
@@ -39,7 +39,7 @@ class LikeStorage(StorageABC):
             self.collection, {self.user_id_field: user_id, self.movie_id_field: film_id}
         )
 
-    async def insert_film_score(self, user_id: UUID, film_id: UUID, score: int):
+    async def insert_film_score(self, user_id: UUID, film_id: UUID, score: int) -> None:
         await self.manager().upsert(
             self.collection,
             {self.user_id_field: user_id, self.movie_id_field: film_id},
@@ -50,7 +50,7 @@ class LikeStorage(StorageABC):
             },
         )
 
-    async def update_film_score(self, user_id: UUID, film_id: UUID, score: int):
+    async def update_film_score(self, user_id: UUID, film_id: UUID, score: int) -> None:
         await self.manager().upsert(
             self.collection,
             {self.user_id_field: user_id, self.movie_id_field: film_id},
@@ -60,7 +60,3 @@ class LikeStorage(StorageABC):
                 self.score_field: score,
             },
         )
-
-
-# аггрегация лайков И дислайков. Пока отказываюсь, так как хз как реализовать по ООПшному
-# next(likes.aggregate([{"$facet": {"likes": [{"$match": {"movie_id": "bb1a3666-dac1-4f7c-bcdd-95df42609d48", "score": 7}}, {"$count": "count"}], "dislikes": [{"$match": {"movie_id": "bb1a3666-dac1-4f7c-bcdd-95df42609d48", "score": 7}}, {"$count": "count"}]}}]))
