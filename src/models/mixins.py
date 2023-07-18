@@ -9,3 +9,7 @@ class UUIDMixin(BaseModel):
 
 class FilmIDMixin(BaseModel):
     film_id: UUID # = Field(alias='movie_id')
+
+
+class ReviewIDMixin(BaseModel):
+    review_id: UUID

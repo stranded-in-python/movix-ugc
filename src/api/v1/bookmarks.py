@@ -20,7 +20,7 @@ async def delete_bookmark(
     await bookmark_service.delete_bookmark(user_id, film_id)
     return Response(status_code=status.HTTP_200_OK)
 
-@router.get("/bookmarks", response_model=None)
+@router.get("/bookmarks/", response_model=None)
 async def get_bookmarks(
     user_id: UUID, bookmark_service: BookmarkServiceABC = Depends(get_bookmark_service)
 ) -> list[ShortBookmark]:

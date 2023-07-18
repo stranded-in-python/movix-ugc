@@ -36,11 +36,14 @@
 Коллекция в которой хранятся рецензии
 {
     "_id": "внутренний id",
+    "review_id": "UUID"
     "user_id": "UUID",
     "movie_id": "UUID",
     "text": "str",
     "timestamp": datetime,
-    "score": int
+    "score": int,
+    'likes': int,
+    'dislikes': int,
 }
 
 Коллекция лайков и дизлайков рецензии
