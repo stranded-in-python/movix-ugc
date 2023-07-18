@@ -37,7 +37,12 @@ class MongoDBManager(MongoDBManagerABC):
         # {'ok': 1.0}
 
     async def get(self, collection: str, *args) -> list[dict[str, Any]] | None:
+        print(*args)
         return await self.get_client()[settings.mongo_db_name][collection].find(*args).to_list(length=None)
+
+    async def insert(self, collection: str, *args):
+        print(*args)
+        await self.get_client()[settings.mongo_db_name][collection].insert_one(*args)
 
     # likes.find_one({'user_id': 'f158bd08-975d-4ac1-8f7d-c07c9a053c13', 'movie_id': 'bb1a3666-dac1-4f7c-bcdd-95df42609d48'})
 

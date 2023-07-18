@@ -11,14 +11,14 @@ router = APIRouter()
 async def post_review(
     user_id: UUID, film_id: UUID, text: str, score: int, review_service: ReviewServiceABC = Depends(get_review_service)
 ) -> Review:
-    pass
+    return await review_service.insert_review(user_id, film_id, text, score)
 
 @router.post("/review-score/", # response_model=None
              )
 async def post_review_score(
     user_id: UUID, review_id: UUID, score: int, review_service: ReviewServiceABC = Depends(get_review_service)
 ) -> ReviewLikes:
-    pass
+    return await review_service.insert_review_score(user_id, review_id, score)
 
 # @router.get("/reviews/", response_model=None)
 # async def get_bookmarks(

@@ -22,12 +22,12 @@ class ReviewService(ReviewServiceABC):
         return await self.storage.insert_review(user_id, film_id, text, score)
     
     async def insert_review_score(self, user_id: UUID, review_id: UUID, score: int) -> ReviewLikes:
-        return await self.manager.insert_review_score(user_id, review_id, score)
+        return await self.storage.insert_review_score(user_id, review_id, score)
     
     async def get_reviews(self):
         pass
 
 
 @lru_cache
-def get_like_service() -> ReviewService:
+def get_review_service() -> ReviewService:
     return ReviewService(storage=ReviewStorage(get_mongo_manager))
