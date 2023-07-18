@@ -20,8 +20,8 @@ async def post_review_score(
 ) -> ReviewLikes:
     return await review_service.insert_review_score(user_id, review_id, score)
 
-# @router.get("/reviews/", response_model=None)
-# async def get_bookmarks(
-#     user_id: UUID, review_service: ReviewServiceABC = Depends(get_review_service)
-# ) -> ?????:
-#     pass
+@router.get("/reviews/", response_model=None)
+async def get_bookmarks(
+    film_id: UUID, sort: str | None = None, review_service: ReviewServiceABC = Depends(get_review_service)
+) -> list[Review]:
+    return await review_service.get_reviews(film_id, sort)

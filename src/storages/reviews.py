@@ -2,9 +2,10 @@ from datetime import datetime
 from typing import Callable
 from uuid import UUID, uuid4
 
+import pymongo
 from managers.mongodb import MongoDBManager
-from models.reviews import Review, ReviewLikes
 
+from models.reviews import Review, ReviewLikes
 from .abc import StorageABC
 
 
@@ -21,6 +22,18 @@ class ReviewStorage(StorageABC):
         self.movie_id_field = 'film_id'
         self.user_id_field = 'user_id'
         self.review_id_field = 'review_id'
+
+    def _sort_2_order(self, sort: str | None):
+        if not sort:
+            return self.review_id_field, pymongo.ASCENDING
+        
+        match sort[0]:
+            case "+":
+                return sort[1:], pymongo.ASCENDING
+            case "-":
+                return sort[1:], pymongo.DESCENDING
+            case _:
+                return self.review_id_field, pymongo.ASCENDING
 
     async def get_reviews(self, *args) -> list[Review] | None:
         reviews: list | None = await self.manager().get(*args)
@@ -68,57 +81,7 @@ class ReviewStorage(StorageABC):
             )
         return ReviewLikes(user_id=user_id, review_id=review_id, score=score)
 
-    # async def get_reviews(self,):
-    #     pass
-
-
-
-#     async def get_average_score(self, film_id: UUID) -> FilmAverageScore:
-#         result = await self.manager().get_average(
-#             self.collection, self.score_field, self.movie_id_field, film_id
-#         )
-#         if not result:
-#             return None
-#         return FilmAverageScore(film_id=film_id, average_score=result.get('avg_val'))
-
-#     async def get_likes(self, film_id: UUID) -> FilmLikes:
-#         likes = await self.manager().get_count(
-#             self.collection, {self.movie_id_field: film_id, self.score_field: 10}
-#         )
-#         dislikes = await self.manager().get_count(
-#             self.collection, {self.movie_id_field: film_id, self.score_field: 0}
-#         )
-#         return FilmLikes(
-#             film_id=film_id, likes=likes.get("count"), dislikes=dislikes.get("count")
-#         )
-
-#     async def delete_film_score(self, user_id: UUID, film_id: UUID) -> None:
-#         await self.manager().delete(
-#             self.collection, {self.user_id_field: user_id, self.movie_id_field: film_id}
-#         )
-
-#     async def insert_film_score(self, user_id: UUID, film_id: UUID, score: int):
-#         await self.manager().upsert(
-#             self.collection,
-#             {self.user_id_field: user_id, self.movie_id_field: film_id},
-#             {
-#                 self.user_id_field: user_id,
-#                 self.movie_id_field: film_id,
-#                 self.score_field: score,
-#             },
-#         )
-
-#     async def update_film_score(self, user_id: UUID, film_id: UUID, score: int):
-#         await self.manager().upsert(
-#             self.collection,
-#             {self.user_id_field: user_id, self.movie_id_field: film_id},
-#             {
-#                 self.user_id_field: user_id,
-#                 self.movie_id_field: film_id,
-#                 self.score_field: score,
-#             },
-#         )
-
-
-# # аггрегация лайков И дислайков. Пока отказываюсь, так как хз как реализовать по ООПшному
-# # next(likes.aggregate([{"$facet": {"likes": [{"$match": {"movie_id": "bb1a3666-dac1-4f7c-bcdd-95df42609d48", "score": 7}}, {"$count": "count"}], "dislikes": [{"$match": {"movie_id": "bb1a3666-dac1-4f7c-bcdd-95df42609d48", "score": 7}}, {"$count": "count"}]}}]))
+    async def get_reviews(self, film_id: UUID, sort: str | None) -> list[Review]:
+        sort_field, order = self._sort_2_order(sort)
+        reviews = await self.manager().get_and_sort(self.review_collection, sort_field, order, {self.movie_id_field: film_id})
+        return [Review(**doc) for doc in reviews]
