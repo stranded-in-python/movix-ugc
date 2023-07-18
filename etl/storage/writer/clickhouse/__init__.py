@@ -1,1 +1,1 @@
-from client import ClickhouseClient
+from .client import ClickhouseWriter

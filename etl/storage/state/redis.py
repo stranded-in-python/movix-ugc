@@ -1,25 +1,25 @@
+import json
+
 import redis
-from utils import logger, on_exception
+from utils import MyEncoder, logger, on_exception
 
 from .base import BaseState
 
 
 class RedisState(BaseState):
-    def __init__(self, base_key: str, host: str, port: int, db: int = 0):
+    def __init__(self, key: str, def_value: dict, host: str, port: int, db: int = 0):
         self._redis = redis.Redis(host=host, port=port, db=db, decode_responses=True)
-        self.key = base_key
-
-    def _gen_key(self, partition: int):
-        return f"{self.key}:{str(partition)}"
+        self.key = key
+        self._def_value = def_value
 
     @on_exception(redis.ConnectionError, logger)
-    def save(self, partition: int, offset: int) -> None:
-        self._redis.set(self._gen_key(partition), offset)
+    def save(self, state: dict) -> None:
+        self._redis.set(self.key, json.dumps(state, cls=MyEncoder))
 
     @on_exception(redis.ConnectionError, logger)
-    def retrieve(self, partition: int) -> int:
-        result = 0
-        value = self._redis.get(self._gen_key(partition))
+    def retrieve(self) -> dict:
+        result = self._def_value
+        value = self._redis.get(self.key)
         if value:
-            result = int(value)
+            result = json.loads(value)
         return result

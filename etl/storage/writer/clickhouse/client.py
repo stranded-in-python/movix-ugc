@@ -5,30 +5,42 @@ import clickhouse_connect
 from clickhouse_connect.driver import Client
 from clickhouse_connect.driver.exceptions import ClickHouseError
 from clickhouse_connect.driver.tools import insert_file
+from storage.writer import BaseWriter
 from utils import logger, on_exception
-from writer import BaseWriter
 
-from core import Settings
 from models import Like
 
 
 class ClickhouseWriter(BaseWriter):
     """Управление процессом ETL из Kafka в Clickhouse."""
 
-    def __init__(self, settings: Settings, model: Union[type[Like], None]):
-        self._settings = settings
+    def __init__(
+        self,
+        host: str,
+        port: int,
+        username: str,
+        password,
+        db: str,
+        table: str,
+        model: Union[type[Like], None],
+    ):
         self._column_names = tuple(model.__fields__.keys())
-        self._table = settings.ch_table
+        self._host = host
+        self._port = port
+        self._username = username
+        self._password = password
+        self._db = db
+        self._table = table
+        self.client = None
 
-    @on_exception(exception=ClickHouseError, logger=logger)
     def _set_client_db(self):
         """Иницализация клиента clickhouse."""
         self.client = clickhouse_connect.get_client(
-            host=self._settings.ch_host,
-            port=self._settings.ch_port,
-            database=self._settings.ch_db,
-            username=self._settings.ch_username,
-            password=self._settings.ch_password,
+            host=self._host,
+            port=self._port,
+            database=self._db,
+            username=self._username,
+            password=self._password,
         )
 
     @contextmanager
@@ -43,10 +55,11 @@ class ClickhouseWriter(BaseWriter):
     @on_exception(exception=ClickHouseError, logger=logger)
     def save(self, data_filepath: str):
         """Сохраняем сообщения в clickhouse."""
-        insert_file(
-            self.client,
-            self._table,
-            data_filepath,
-            column_names=self._column_names,
-            database=self._settings.ch_db,
-        )
+        with self._get_client_db():
+            insert_file(
+                self.client,
+                self._table,
+                data_filepath,
+                column_names=self._column_names,
+                database=self._db,
+            )

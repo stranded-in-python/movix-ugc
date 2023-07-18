@@ -1,1 +1,2 @@
-from base import BaseWriter
+from .base import BaseWriter
+from .clickhouse import ClickhouseWriter

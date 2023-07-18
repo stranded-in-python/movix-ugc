@@ -1,2 +1,2 @@
 from .connection import MongoConnect
-from .reader import Reader
+from .reader import MongoReader

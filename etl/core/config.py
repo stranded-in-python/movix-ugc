@@ -8,8 +8,6 @@ class ModelConfig:
 class Settings(BaseSettings):
     project_name: str = "movix-events"
 
-    collections = {"likes": "likes"}
-
     kafka_host: str = Field("localhost", env="KAFKA_HOST")
     kafka_port: str = Field("9092", env="KAFKA_PORT")
 
@@ -32,12 +30,12 @@ class Settings(BaseSettings):
 
     mongo_host: str = Field("localhost", env="MONGO_HOST")
     mongo_port: str = Field("27017", env="MONGO_PORT")
-    mongo_user: str | None = Field(..., env="MONGO_USER")
-    mongo_password: str | None = Field(..., env="MONGO_PASSWORD")
+    mongo_user: str | None = Field(env="MONGO_USER")
+    mongo_password: str | None = Field(env="MONGO_PASSWORD")
     mongo_db: str = Field("test", env="MONGO_DB")
-    mongo_rs: str | None = Field(..., env="MONGO_REPLICASET")
+    mongo_rs: str | None = Field(env="MONGO_REPLICASET")
     mongo_authdb: str = Field("test", env="MONGO_AUTHDB")
-    mongo_certpath: str | None = Field(..., env="MONGO_CERTPATH")
+    mongo_certpath: str | None = Field(env="MONGO_CERTPATH")
 
     @property
     def kafka_server(self):
