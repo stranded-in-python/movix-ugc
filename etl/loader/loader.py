@@ -2,7 +2,7 @@ from .base import BaseLoader
 from .mixins.csv_mixin import CSVMixin
 
 
-class LikesLoader(BaseLoader, CSVMixin):
+class Loader(BaseLoader, CSVMixin):
     def load(self):
         state = self._state_storage.retrieve()
         last_loaded = state['timestamp']
@@ -26,7 +26,8 @@ class LikesLoader(BaseLoader, CSVMixin):
 
             self._logger.info(f"Found {len(models)} models to load.")
 
-            state['skip'] += state['limit']
-            state['timestamp'] = last_loaded
-            self._state_storage.save(state)
+        state['skip'] += state['limit']
+        state['timestamp'] = last_loaded
+        self._state_storage.save(state)
+
         return len(load_queue)

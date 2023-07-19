@@ -1,2 +1,2 @@
 from .base import BaseLoader
-from .likes import LikesLoader
+from .loader import Loader

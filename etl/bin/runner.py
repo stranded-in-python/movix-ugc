@@ -1,28 +1,31 @@
+import time
+
 import loader
-import pendulum
+import pydantic
 import storage
 from utils import logger
 
-import models
 from core import Settings
 
-DATA_FILENAME = 'data_likes.csv'
-WRITE_TABELNAME = 'likes_movies'
-KEY_STATESTOREGE = 'movix:ugc:etl:likes'
 
-if __name__ == '__main__':
-    settings = Settings()
-    loader = loader.LikesLoader(
-        model=models.Like,
-        data_filename=DATA_FILENAME,
+def run(
+    name: str,
+    settings: Settings,
+    loader: type[loader.BaseLoader],
+    model: type[pydantic.BaseModel],
+    data_filename: str,
+    key_statestorage: str,
+    state_defvalue: dict,
+    collection: str,
+    write_tabelname: str,
+):
+    loader = loader(
+        model=model,
+        data_filename=data_filename,
         settings=settings,
         state_storage=storage.state.RedisState(
-            key=KEY_STATESTOREGE,
-            def_value={
-                'timestamp': pendulum.parse('2023-07-01T00:0:01.965Z'),
-                'limit': 1,
-                'skip': 0,
-            },
+            key=key_statestorage,
+            def_value=state_defvalue,
             host=settings.redis_host,
             port=settings.redis_port,
         ),
@@ -37,7 +40,7 @@ if __name__ == '__main__':
                 main_db=settings.mongo_db,
                 cert_path=settings.mongo_certpath,
             ),
-            collection='likes',
+            collection=collection,
         ),
         writer=storage.writers.ClickhouseWriter(
             host=settings.ch_host,
@@ -45,11 +48,19 @@ if __name__ == '__main__':
             username=settings.ch_username,
             password=settings.ch_password,
             db=settings.ch_db,
-            table=WRITE_TABELNAME,
-            model=models.Like,
+            table=write_tabelname,
+            model=model,
         ),
         logger=logger,
     )
 
     while True:
-        loader.load()
+        try:
+            processed = loader.load()
+            if processed == 0:
+                logger.warning(f"No docs for ETL {name}, to sleep")
+                time.sleep(5)
+
+        except KeyboardInterrupt:
+            logger.warning('Quit')
+            break

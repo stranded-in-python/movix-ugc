@@ -2,13 +2,12 @@ from contextlib import contextmanager
 from typing import Generator, Union
 
 import clickhouse_connect
+import pydantic
 from clickhouse_connect.driver import Client
 from clickhouse_connect.driver.exceptions import ClickHouseError
 from clickhouse_connect.driver.tools import insert_file
 from storage.writers import BaseWriter
 from utils import logger, on_exception
-
-from models import Like
 
 
 class ClickhouseWriter(BaseWriter):
@@ -22,7 +21,7 @@ class ClickhouseWriter(BaseWriter):
         password,
         db: str,
         table: str,
-        model: Union[type[Like], None],
+        model: Union[type[pydantic.BaseModel], None],
     ):
         self._column_names = tuple(model.__fields__.keys())
         self._host = host
