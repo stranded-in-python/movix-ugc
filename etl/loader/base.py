@@ -7,7 +7,7 @@ import storage
 class BaseLoader(metaclass=abc.ABCMeta):
     def __init__(
         self,
-        model: pydantic.BaseModel,
+        model: type[pydantic.BaseModel],
         data_filename: str,
         settings: pydantic.BaseSettings,
         state_storage: storage.state.BaseState,

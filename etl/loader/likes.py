@@ -29,3 +29,4 @@ class LikesLoader(BaseLoader, CSVMixin):
             state['skip'] += state['limit']
             state['timestamp'] = last_loaded
             self._state_storage.save(state)
+        return len(load_queue)
