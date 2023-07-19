@@ -17,7 +17,7 @@ class LikeStorage(StorageABC):
         self.movie_id_field = 'film_id'
         self.user_id_field = 'user_id'
 
-    async def get_average_score(self, film_id: UUID) -> FilmAverageScore:
+    async def get_average(self, film_id: UUID) -> FilmAverageScore:
         result = await self.manager().get_average(
             self.collection, self.score_field, self.movie_id_field, film_id
         )
@@ -25,7 +25,7 @@ class LikeStorage(StorageABC):
             return None
         return FilmAverageScore(film_id=film_id, average_score=result.get('avg_val'))
 
-    async def get_likes(self, film_id: UUID) -> FilmLikes:
+    async def get_count(self, film_id: UUID) -> FilmLikes:
         likes = await self.manager().get_count(
             self.collection, {self.movie_id_field: film_id, self.score_field: 10}
         )
@@ -36,20 +36,26 @@ class LikeStorage(StorageABC):
             film_id=film_id, likes=likes.get("count"), dislikes=dislikes.get("count")
         )
 
-    async def delete_film_score(self, user_id: UUID, film_id: UUID) -> None:
+    async def delete(self, user_id: UUID, film_id: UUID) -> None:
         await self.manager().delete(
             self.collection, {self.user_id_field: user_id, self.movie_id_field: film_id}
         )
 
-    async def insert_film_score(self, user_id: UUID, film_id: UUID, score: int, timestamp: datetime) -> None:
+    async def insert(
+        self, user_id: UUID, film_id: UUID, score: int, timestamp: datetime
+    ) -> None:
         await self.manager().upsert(
             self.collection,
             {self.user_id_field: user_id, self.movie_id_field: film_id},
             {
-                self.user_id_field: user_id,
-                self.movie_id_field: film_id,
-                self.score_field: score,
-                self.timestamp_field: timestamp
+                "$set": {
+                    self.user_id_field: user_id,
+                    self.movie_id_field: film_id,
+                    self.score_field: score,
+                    self.timestamp_field: timestamp,
+                }
             },
         )
 
+    async def get(self, *args, **kwargs):
+        raise NotImplementedError

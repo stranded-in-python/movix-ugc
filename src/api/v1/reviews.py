@@ -1,8 +1,9 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Path, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
+from core.predefined import LikeDislike
 from models.reviews import Review, ReviewLikes
 from services.reviews import ReviewServiceABC, get_review_service
 
@@ -16,7 +17,9 @@ async def post_review(
     text: str,
     score: Annotated[
         int,
-        Path(title="Score of how you liked the movie. 10-like, 0-dislike", ge=1, le=10),
+        Query(
+            title="Score of how you liked the movie. 10-like, 0-dislike", ge=1, le=10
+        ),
     ],
     review_service: ReviewServiceABC = Depends(get_review_service),
 ) -> Review:
@@ -27,12 +30,7 @@ async def post_review(
 async def post_review_score(
     user_id: UUID,
     review_id: UUID,
-    score: Annotated[
-        int,
-        Path(
-            title="Score of how you liked the review. 10-like, 0-dislike", ge=1, le=10
-        ),
-    ],
+    score: LikeDislike,
     review_service: ReviewServiceABC = Depends(get_review_service),
 ) -> ReviewLikes:
     return await review_service.insert_review_score(user_id, review_id, score)

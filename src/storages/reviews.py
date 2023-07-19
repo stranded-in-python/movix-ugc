@@ -36,36 +36,37 @@ class ReviewStorage(StorageABC):
             case _:
                 return self.review_id_field, pymongo.ASCENDING
 
-    async def get_reviews(self, *args) -> list[Review] | None:
+    async def get(self, *args) -> list[Review] | None:
         reviews: list | None = await self.manager().get(*args)
         if not reviews:
             return None
-        return [Review(**doc) for doc in reviews]
+        return reviews
 
-    async def insert_review(
+    async def insert(
         self, user_id: UUID, film_id: UUID, text: str, score: int
     ) -> Review:
-        old_review = await self.get_reviews(
+        old_review = await self.get(
             self.review_collection,
             {
                 self.user_id_field: {"$eq": user_id},
                 self.movie_id_field: {"$eq": film_id},
             },
         )
-        if not old_review:
-            new_review = {
-                self.review_id_field: uuid4(),
-                self.user_id_field: user_id,
-                self.movie_id_field: film_id,
-                self.text_field: text,
-                self.score_field: score,
-                self.dislikes_field: 0,
-                self.likes_field: 0,
-                self.timestamp_field: datetime.now(),
-            }
-            await self.manager().insert(self.review_collection, new_review)
-            return Review(**new_review)
-        return old_review[0]
+        if old_review:
+            old_review = [Review(**doc) for doc in old_review]
+            return old_review[0]
+        new_review = {
+            self.review_id_field: uuid4(),
+            self.user_id_field: user_id,
+            self.movie_id_field: film_id,
+            self.text_field: text,
+            self.score_field: score,
+            self.dislikes_field: 0,
+            self.likes_field: 0,
+            self.timestamp_field: datetime.now(),
+        }
+        await self.manager().insert(self.review_collection, new_review)
+        return Review(**new_review)
 
     async def insert_review_score(
         self, user_id: UUID, review_id: UUID, score: int
@@ -78,7 +79,7 @@ class ReviewStorage(StorageABC):
                     self.user_id_field: user_id,
                     self.review_id_field: review_id,
                     self.score_field: score,
-                    self.timestamp_field: datetime.now()
+                    self.timestamp_field: datetime.now(),
                 }
             },
         )
@@ -102,3 +103,6 @@ class ReviewStorage(StorageABC):
         if not reviews:
             return None
         return [Review(**doc) for doc in reviews]
+
+    async def delete(*args, **kwargs):
+        raise NotImplementedError

@@ -16,16 +16,14 @@ class BookmarkService(BookmarkServiceABC):
 
     async def insert_bookmark(self, user_id: UUID, film_id: UUID) -> Bookmark:
         now = datetime.now()
-        await self.storage.insert_bookmark(user_id, film_id, now)
+        await self.storage.insert(user_id, film_id, now)
         return Bookmark(user_id=user_id, film_id=film_id, timestamp=now)
 
     async def delete_bookmark(self, user_id: UUID, film_id: UUID) -> Bookmark:
-        await self.storage.delete_bookmark(
-            user_id, film_id
-        )  # не вижу смысла что-то возвращать
+        await self.storage.delete(user_id, film_id)
 
     async def get_bookmarks(self, user_id: UUID) -> list[ShortBookmark]:
-        return await self.storage.get_bookmarks(user_id)
+        return await self.storage.get(user_id)
 
 
 @lru_cache

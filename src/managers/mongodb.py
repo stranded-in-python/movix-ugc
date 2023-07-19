@@ -88,7 +88,7 @@ class MongoDBManager(MongoDBManagerABC):
 
     async def delete(self, collection: str, document: dict[str, Any]) -> None:
         col = self.get_client()[settings.mongo_db_name][collection]
-        await col.delete_one(document)
+        return await col.delete_one(document)
 
 
 def get_mongo_manager() -> MongoDBManagerABC:

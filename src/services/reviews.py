@@ -16,7 +16,7 @@ class ReviewService(ReviewServiceABC):
     async def insert_review(
         self, user_id: UUID, film_id: UUID, text: str, score: int
     ) -> Review:
-        return await self.storage.insert_review(user_id, film_id, text, score)
+        return await self.storage.insert(user_id, film_id, text, score)
 
     async def insert_review_score(
         self, user_id: UUID, review_id: UUID, score: int

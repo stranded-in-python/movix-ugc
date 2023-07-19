@@ -16,25 +16,25 @@ class BookmarkStorage(StorageABC):
         self.movie_id_field = 'film_id'
         self.user_id_field = 'user_id'
 
-    async def insert_bookmark(
-        self, user_id: UUID, film_id: UUID, timestamp: datetime
-    ) -> None:
+    async def insert(self, user_id: UUID, film_id: UUID, timestamp: datetime) -> None:
         await self.manager().upsert(
             self.collection,
             {self.user_id_field: user_id, self.movie_id_field: film_id},
             {
-                self.user_id_field: user_id,
-                self.movie_id_field: film_id,
-                self.timestamp_field: timestamp,
+                "$set": {
+                    self.user_id_field: user_id,
+                    self.movie_id_field: film_id,
+                    self.timestamp_field: timestamp,
+                }
             },
         )
 
-    async def delete_bookmark(self, user_id: UUID, film_id: UUID) -> None:
+    async def delete(self, user_id: UUID, film_id: UUID) -> None:
         await self.manager().delete(
             self.collection, {self.user_id_field: user_id, self.movie_id_field: film_id}
         )
 
-    async def get_bookmarks(self, user_id: UUID) -> list[ShortBookmark] | None:
+    async def get(self, user_id: UUID) -> list[ShortBookmark] | None:
         bookmarks: list | None = await self.manager().get(
             self.collection, {self.user_id_field: {"$eq": user_id}}
         )
