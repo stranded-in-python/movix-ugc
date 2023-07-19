@@ -10,7 +10,12 @@ from utils import (
 
 
 class MongoTester:
-    def __init__(self, client: MongoClient = MongoClient("localhost", 27017, uuidRepresentation='standard')):
+    def __init__(
+        self,
+        client: MongoClient = MongoClient(
+            "localhost", 27017, uuidRepresentation='standard'
+        ),
+    ):
         self.client = client
         self.db = self.client.test_database
         self.batch_size = 1000

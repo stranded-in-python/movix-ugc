@@ -1,5 +1,5 @@
 from functools import wraps
-from random import getrandbits, randint
+from random import randint
 from time import time
 from uuid import uuid4
 
