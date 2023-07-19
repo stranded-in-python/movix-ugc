@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Callable
 from uuid import UUID
 
@@ -12,6 +13,7 @@ class LikeStorage(StorageABC):
         self.manager = manager
         self.collection = 'likes'
         self.score_field = 'score'
+        self.timestamp_field = 'timestamp'
         self.movie_id_field = 'film_id'
         self.user_id_field = 'user_id'
 
@@ -39,7 +41,7 @@ class LikeStorage(StorageABC):
             self.collection, {self.user_id_field: user_id, self.movie_id_field: film_id}
         )
 
-    async def insert_film_score(self, user_id: UUID, film_id: UUID, score: int) -> None:
+    async def insert_film_score(self, user_id: UUID, film_id: UUID, score: int, timestamp: datetime) -> None:
         await self.manager().upsert(
             self.collection,
             {self.user_id_field: user_id, self.movie_id_field: film_id},
@@ -47,16 +49,7 @@ class LikeStorage(StorageABC):
                 self.user_id_field: user_id,
                 self.movie_id_field: film_id,
                 self.score_field: score,
+                self.timestamp_field: timestamp
             },
         )
 
-    async def update_film_score(self, user_id: UUID, film_id: UUID, score: int) -> None:
-        await self.manager().upsert(
-            self.collection,
-            {self.user_id_field: user_id, self.movie_id_field: film_id},
-            {
-                self.user_id_field: user_id,
-                self.movie_id_field: film_id,
-                self.score_field: score,
-            },
-        )

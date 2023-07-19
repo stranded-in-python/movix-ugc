@@ -78,6 +78,7 @@ class ReviewStorage(StorageABC):
                     self.user_id_field: user_id,
                     self.review_id_field: review_id,
                     self.score_field: score,
+                    self.timestamp_field: datetime.now()
                 }
             },
         )
