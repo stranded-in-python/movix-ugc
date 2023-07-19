@@ -14,9 +14,8 @@ def generate_random_data(rows: int = 10_000_000, batch_size: int = 1000) -> list
         for _ in range(batch_size):
             random_batch.append(
                 {
-                    "id": getrandbits(33),
-                    "user_id": getrandbits(33),
-                    "film_id": getrandbits(33),
+                    "user_id": uuid4(),
+                    "film_id": uuid4(),
                     "timestamp": fake.date_time_between(),
                 }
             )
@@ -31,9 +30,10 @@ def generate_random_likes(
         for _ in range(batch_size):
             random_batch.append(
                 {
-                    "user_id": str(uuid4()),
-                    "movie_id": str(uuid4()),
+                    "user_id": uuid4(),
+                    "movie_id": uuid4(),
                     "score": randint(0, 10),
+                    "timestamp": fake.date_time_between(),
                 }
             )
         yield random_batch
@@ -47,8 +47,8 @@ def generate_random_bookmarks(
         for _ in range(batch_size):
             random_batch.append(
                 {
-                    "user_id": str(uuid4()),
-                    "movie_id": str(uuid4()),
+                    "user_id": uuid4(),
+                    "movie_id": uuid4(),
                     "timestamp": fake.date_time_between(),
                 }
             )
@@ -63,8 +63,8 @@ def generate_random_reviews(
         for _ in range(batch_size):
             random_batch.append(
                 {
-                    "author": str(uuid4()),
-                    "movie": str(uuid4()),
+                    "user_id": uuid4(),
+                    "film_id": uuid4(),
                     "text": fake.paragraph(nb_sentences=50),
                     "timestamp": fake.date_time_between(),
                     "score": randint(0, 10),
