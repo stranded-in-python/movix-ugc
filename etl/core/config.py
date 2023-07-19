@@ -26,7 +26,6 @@ class Settings(BaseSettings):
     ch_table: str = Field("watching_movies", env="CLICKHOUSE_TABLE")
     ch_username: str = Field("movix", env="CLICKHOUSE_USERNAME")
     ch_password: str = Field("qwe123", env="CLICKHOUSE_PASSWORD")
-    ch_tablelikes: str = Field("likes_movies", env="CLICKHOUSE_TABLELIKES")
 
     mongo_host: str = Field("localhost", env="MONGO_HOST")
     mongo_port: str = Field("27017", env="MONGO_PORT")

@@ -6,14 +6,18 @@ from utils import logger
 import models
 from core import Settings
 
+DATA_FILENAME = 'data_likes.csv'
+WRITE_TABELNAME = 'likes_movies'
+KEY_STATESTOREGE = 'movix:ugc:etl:likes'
+
 if __name__ == '__main__':
     settings = Settings()
     loader = loader.LikesLoader(
         model=models.Like,
-        data_filename='data_likes.csv',
+        data_filename=DATA_FILENAME,
         settings=settings,
         state_storage=storage.state.RedisState(
-            key='movix:ugc:etl:likes',
+            key=KEY_STATESTOREGE,
             def_value={
                 'timestamp': pendulum.parse('2023-07-01T00:0:01.965Z'),
                 'limit': 1,
@@ -41,7 +45,7 @@ if __name__ == '__main__':
             username=settings.ch_username,
             password=settings.ch_password,
             db=settings.ch_db,
-            table='likes_movies',
+            table=WRITE_TABELNAME,
             model=models.Like,
         ),
         logger=logger,

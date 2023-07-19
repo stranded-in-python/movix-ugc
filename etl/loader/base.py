@@ -11,8 +11,8 @@ class BaseLoader(metaclass=abc.ABCMeta):
         data_filename: str,
         settings: pydantic.BaseSettings,
         state_storage: storage.state.BaseState,
-        reader: storage.reader.BaseReader,
-        writer: storage.writer.BaseWriter,
+        reader: storage.readers.BaseReader,
+        writer: storage.writers.BaseWriter,
         logger,
     ):
         self._model = model

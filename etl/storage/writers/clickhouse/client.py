@@ -5,7 +5,7 @@ import clickhouse_connect
 from clickhouse_connect.driver import Client
 from clickhouse_connect.driver.exceptions import ClickHouseError
 from clickhouse_connect.driver.tools import insert_file
-from storage.writer import BaseWriter
+from storage.writers import BaseWriter
 from utils import logger, on_exception
 
 from models import Like
