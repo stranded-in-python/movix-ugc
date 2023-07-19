@@ -26,8 +26,8 @@ if __name__ == '__main__':
             host=settings.redis_host,
             port=settings.redis_port,
         ),
-        reader=storage.reader.MongoReader(
-            storage.reader.MongoConnect(
+        reader=storage.readers.MongoReader(
+            storage.readers.MongoConnect(
                 host=settings.mongo_host,
                 port=settings.mongo_port,
                 user=settings.mongo_user,
@@ -39,7 +39,7 @@ if __name__ == '__main__':
             ),
             collection='likes',
         ),
-        writer=storage.writer.ClickhouseWriter(
+        writer=storage.writers.ClickhouseWriter(
             host=settings.ch_host,
             port=settings.ch_port,
             username=settings.ch_username,
@@ -50,5 +50,6 @@ if __name__ == '__main__':
         ),
         logger=logger,
     )
+
     while True:
         loader.load()

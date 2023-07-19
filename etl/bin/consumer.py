@@ -21,7 +21,7 @@ class Executer:
     """Управление процессом ETL из Kafka в Clickhouse."""
 
     def __init__(
-        self, settings: Settings, offset_storage: storage.state.offset.BaseStorage
+        self, settings: Settings, offset_storage: storage.state.BaseOffsetStorage
     ):
         self._settings = settings
         self._data_filename = 'data.csv'
@@ -194,7 +194,7 @@ if __name__ == '__main__':
     settings = Settings()
     executer = Executer(
         settings=settings,
-        offset_storage=storage.state.offset.RedisStorage(
+        offset_storage=storage.state.RedisOffsetStorage(
             settings.redis_key_prefix, settings.redis_host, settings.redis_port
         ),
     )
