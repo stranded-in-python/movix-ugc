@@ -27,7 +27,7 @@ class LikesLoader(BaseLoader, CSVMixin):
             self._logger.info(f"Found {len(models)} models to load.")
 
             state['skip'] += state['limit']
-            state['timestamp'] = max(d["timestamp"] for d in load_queue)
+            state['timestamp'] = last_loaded
             self._state_storage.save(state)
 
 

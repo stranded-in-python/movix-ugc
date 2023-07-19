@@ -1,7 +1,7 @@
 import json
 
 import redis
-from utils import MyEncoder, logger, on_exception
+from utils import MyEncoder, json_parser, logger, on_exception
 
 from .base import BaseState
 
@@ -21,5 +21,5 @@ class RedisState(BaseState):
         result = self._def_value
         value = self._redis.get(self.key)
         if value:
-            result = json.loads(value)
+            result = json.loads(value, object_hook=json_parser)
         return result
