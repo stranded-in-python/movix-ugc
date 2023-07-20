@@ -62,4 +62,6 @@ COPY ./etl ${APP_HOME}
 #COPY ./src/core/config.py ${APP_HOME}/consumer/models/config.py
 # COPY ./pyproject.toml /pyproject.toml
 
+RUN mv ${APP_HOME}/bin/consumer.py ${APP_HOME}/bin/start.py
+
 ENTRYPOINT ["/entrypoint"]
