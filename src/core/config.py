@@ -35,6 +35,12 @@ class Settings(BaseSettings):
         return f"{self.kafka_host}:{self.kafka_port}"
 
     base_dir = os.path.dirname(os.path.dirname(__file__))
+    sentry_dsn_ugc_api: str = ""
 
 
 settings = Settings()
+
+if settings.sentry_dsn_ugc_api:
+    import sentry_sdk
+
+    sentry_sdk.init(dsn=settings.sentry_dsn_ugc_api, traces_sample_rate=1.0)
