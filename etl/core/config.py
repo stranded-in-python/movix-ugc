@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     ch_table: str = Field("watching_movies", env="CLICKHOUSE_TABLE")
     ch_username: str = Field("movix", env="CLICKHOUSE_USERNAME")
     ch_password: str = Field("qwe123", env="CLICKHOUSE_PASSWORD")
+    sentry_dsn_ugc_etl: str = ""
 
     @property
     def kafka_server(self):
@@ -40,3 +41,8 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+if settings.sentry_dsn_ugc_etl:
+    import sentry_sdk
+
+    sentry_sdk.init(dsn=settings.sentry_dsn_ugc_etl, traces_sample_rate=1.0)
