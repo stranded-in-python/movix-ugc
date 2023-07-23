@@ -56,58 +56,52 @@ sys.exit(0)
 END
 }
 
-kafka_ready() {
+mongo_ready() {
 python << END
 import sys
 
 from pydantic import BaseSettings, Field
 
-from confluent_kafka import Consumer, KafkaException
+from pymongo import MongoClient
+from pymongo.errors import ConnectionError
 
 class Settings(BaseSettings):
-    kafka_host: str = Field('localhost1', env='KAFKA_HOST')
-    kafka_port: str = Field('9092', env='KAFKA_PORT')
-    group_id: str = Field('group_watching_movies', env='KAFKA_GROUP_ID')
-    topic: str = Field('watching_movies', env='KAFKA_TOPIC')
-    batch_timeout: int = Field(10, env='BATCH_TIMEOUT') # in sec
-    batch_size: int = Field(10, env='BATCH_SIZE')
-    ch_host: str = Field('localhost', env='CLICKHOUSE_HOST')
-    ch_port: int = Field(18123, env='CLICKHOUSE_PORT')
-    ch_db: str = Field('db1', env='CLICKHOUSE_DATABASE')
-    ch_table: str = Field('watching_movies', env='CLICKHOUSE_TABLE')
-    ch_username: str = Field('user1', env='CLICKHOUSE_USERNAME')
-    ch_password: str = Field('pass1', env='CLICKHOUSE_PASSWORD')
+    mongo_host: str = Field("localhost", env="MONGO_HOST")
+    mongo_port: str = Field("27017", env="MONGO_PORT")
+    mongo_user: str | None = Field(env="MONGO_USER")
+    mongo_password: str | None = Field(env="MONGO_PASSWORD")
+    mongo_db: str = Field("test", env="MONGO_DB")
+    mongo_rs: str | None = Field(env="MONGO_REPLICASET")
+    mongo_authdb: str = Field("test", env="MONGO_AUTHDB")
+    mongo_certpath: str | None = Field(env="MONGO_CERTPATH")
 
     @property
-    def kafka_server(self):
-        return f"{self.kafka_host}:{self.kafka_port}"
-
+    def mongo_uri(self):
+        uri = 'mongodb://'
+        if self.mongo_user and self.mongo_password:
+            uri += f'{quote(self.mongo_user)}:{quote(self.mongo_password)}@'
+        uri += '{hosts}:{port}/?authSource={auth_src}'.format(
+            hosts=self.mongo_host, port=self.mongo_port, auth_src=self.mongo_authdb
+        )
+        if self.mongo_rs:
+            uri += f'&replicaSet={self.mongo_rs}'
+        return uri
 
 settings = Settings()
 
-def ping_kafka():
+def ping_mongo():
     try:
-        kc = Consumer({
-                'bootstrap.servers': settings.kafka_server,
-                'group.id': settings.group_id,
-                'auto.offset.reset': 'latest',
-                #'auto.offset.reset': 'earliest',
-                'partition.assignment.strategy': 'roundrobin',
-                'enable.auto.commit': 'true',
-                'session.timeout.ms': '45000',
-                #'broker.address.family': 'v4',
-            })
-        topics = kc.list_topics(timeout=1)
-
-    except KafkaException:
+        client = MongoClient(settings.mongo_uri, tlsCAFile=settings.mongo_certpath)[settings.mongo_db]
+        client.server_info()
+    except ConnectionError:
         sys.exit(-1)
     finally:
-        kc.close()
+        if client:
+            client.close()
 
-ping_kafka()
+ping_mongo()
 
 sys.exit(0)
-
 END
 }
 
@@ -117,10 +111,10 @@ until clickhouse_ready; do
 done
 >&2 echo 'Clickhouse is available'
 
-until kafka_ready; do
-  >&2 echo 'Waiting for Kafka to become available...'
+until mongo_ready; do
+  >&2 echo 'Waiting for Mongo to become available...'
   sleep 5
 done
->&2 echo 'Kafka is available'
+>&2 echo 'Mongo is available'
 
 exec "$@"
