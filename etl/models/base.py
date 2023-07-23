@@ -10,7 +10,7 @@ class Base(BaseModel):
         return pendulum.parse(v)
 
 
-class Like(Base):
+class Score(Base):
     score: int
 
     @validator('score')

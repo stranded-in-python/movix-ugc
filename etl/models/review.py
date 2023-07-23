@@ -1,9 +1,9 @@
 from uuid import UUID
 
-from .base import Like
+from .base import Score
 
 
-class Review(Like):
+class Review(Score):
     review_id: UUID
     user_id: UUID
     movie_id: UUID

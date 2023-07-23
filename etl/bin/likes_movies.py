@@ -14,7 +14,7 @@ STATE_DEFVALUE = {
     'limit': 1,
     'skip': 0,
 }
-MODEL = models.LikeMovie
+MODEL = models.FilmScore
 
 if __name__ == '__main__':
     run(
