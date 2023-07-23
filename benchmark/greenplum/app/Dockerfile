@@ -26,7 +26,7 @@ RUN pip install --no-cache-dir --no-index --find-links=/wheels/ /wheels/* \
 
 WORKDIR ${APP_HOME}
 
-COPY ./bin/entrypoint /entrypoint
+COPY ./bin/entrypoint.sh /entrypoint.sh
 COPY ./src ${APP_HOME}
 
 ENTRYPOINT ["/entrypoint.sh"]
