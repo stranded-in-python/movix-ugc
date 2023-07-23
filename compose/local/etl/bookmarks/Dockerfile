@@ -59,6 +59,7 @@ RUN chmod +x /start
 
 # copy application code to WORKDIR
 COPY ./etl ${APP_HOME}
-# COPY ./pyproject.toml /pyproject.toml
+
+RUN mv ${APP_HOME}/bin/bookmarks.py ${APP_HOME}/bin/start.py
 
 ENTRYPOINT ["/entrypoint"]
