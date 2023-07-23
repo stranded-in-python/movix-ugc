@@ -5,8 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from auth.users import get_current_user
 from core.predefined import LikeDislike
-from models.reviews import Review, ReviewLikes
 from models.models import User
+from models.reviews import Review, ReviewLikes
 from services.reviews import ReviewServiceABC, get_review_service
 
 router = APIRouter()
@@ -23,7 +23,8 @@ async def post_review(
             title="Score of how you liked the movie. 10-like, 0-dislike", ge=1, le=10
         ),
     ],
-    user_creds: User, user=Depends(get_current_user),
+    user_creds: User,
+    user=Depends(get_current_user),
     review_service: ReviewServiceABC = Depends(get_review_service),
 ) -> Review:
     return await review_service.insert_review(user_id, film_id, text, score)
@@ -34,7 +35,8 @@ async def post_review_score(
     user_id: UUID,
     review_id: UUID,
     score: LikeDislike,
-    user_creds: User, user=Depends(get_current_user),
+    user_creds: User,
+    user=Depends(get_current_user),
     review_service: ReviewServiceABC = Depends(get_review_service),
 ) -> ReviewLikes:
     return await review_service.insert_review_score(user_id, review_id, score)

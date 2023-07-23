@@ -14,7 +14,8 @@ router = APIRouter()
 async def post_bookmark(
     user_id: UUID,
     film_id: UUID,
-    user_creds: User, user=Depends(get_current_user),
+    user_creds: User,
+    user=Depends(get_current_user),
     bookmark_service: BookmarkServiceABC = Depends(get_bookmark_service),
 ) -> Bookmark:
     return await bookmark_service.insert_bookmark(user_id, film_id)
@@ -24,7 +25,8 @@ async def post_bookmark(
 async def delete_bookmark(
     film_id: UUID,
     user_id: UUID,
-    user_creds: User, user=Depends(get_current_user),
+    user_creds: User,
+    user=Depends(get_current_user),
     bookmark_service: BookmarkServiceABC = Depends(get_bookmark_service),
 ) -> Response(status_code=status.HTTP_200_OK):
     await bookmark_service.delete_bookmark(user_id, film_id)
@@ -33,7 +35,10 @@ async def delete_bookmark(
 
 @router.get("/bookmarks/", response_model=None)
 async def get_bookmarks(
-    user_id: UUID, user_creds: User, user=Depends(get_current_user), bookmark_service: BookmarkServiceABC = Depends(get_bookmark_service)
+    user_id: UUID,
+    user_creds: User,
+    user=Depends(get_current_user),
+    bookmark_service: BookmarkServiceABC = Depends(get_bookmark_service),
 ) -> list[ShortBookmark]:
     bookmarks = await bookmark_service.get_bookmarks(user_id)
     if not bookmarks:
