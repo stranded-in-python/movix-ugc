@@ -59,6 +59,9 @@ END
 mongo_ready() {
 python << END
 import sys
+
+from pydantic import BaseSettings, Field
+
 from pymongo import MongoClient
 from pymongo.errors import ConnectionError
 
