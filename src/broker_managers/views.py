@@ -5,7 +5,7 @@ from core.logger import logger
 from deserializers.abc import Deserializer
 from deserializers.deserializers import KafkaDeserializer
 from models.models import BasicViewEvent, UserViewEvent
-from storages.storages import StorageABC, get_kafka_instance
+from storages.brokers import BrokerABC, get_kafka_instance
 
 from .abc import EventSerializerManager
 
@@ -13,7 +13,7 @@ logger()
 
 
 class ViewSerializerManager(EventSerializerManager):
-    def __init__(self, deserializer: Deserializer, storage: StorageABC):
+    def __init__(self, deserializer: Deserializer, storage: BrokerABC):
         self.deserializer = deserializer
         self.storage = storage
 

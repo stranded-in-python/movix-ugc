@@ -30,6 +30,10 @@ class Settings(BaseSettings):
 
     auth_user_rights_endpoint: str = 'http://auth:8000/api/v1/users/user_id/roles'
 
+    mongo_host: str = Field("localhost", env="MONGO_HOST")
+    mongo_port: int = Field(27017, env="MONGO_PORT")
+    mongo_db_name: str = Field("test_database", env="MONGO_DB_NAME")
+
     @property
     def kafka_server(self):
         return f"{self.kafka_host}:{self.kafka_port}"
