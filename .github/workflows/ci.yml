@@ -40,6 +40,7 @@ jobs:
           python3.11 -m venv .venv
           source .venv/bin/activate
           pip install -r requirements.txt
+          pip install sentry-sdk
           pre-commit run --show-diff-on-failure --color=always --all-files
 
   builder-api:

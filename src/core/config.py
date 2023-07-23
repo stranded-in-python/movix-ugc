@@ -30,11 +30,21 @@ class Settings(BaseSettings):
 
     auth_user_rights_endpoint: str = 'http://auth:8000/api/v1/users/user_id/roles'
 
+    mongo_host: str = Field("localhost", env="MONGO_HOST")
+    mongo_port: int = Field(27017, env="MONGO_PORT")
+    mongo_db_name: str = Field("test_database", env="MONGO_DB_NAME")
+
     @property
     def kafka_server(self):
         return f"{self.kafka_host}:{self.kafka_port}"
 
     base_dir = os.path.dirname(os.path.dirname(__file__))
+    sentry_dsn_ugc_api: str = ""
 
 
 settings = Settings()
+
+if settings.sentry_dsn_ugc_api:
+    import sentry_sdk
+
+    sentry_sdk.init(dsn=settings.sentry_dsn_ugc_api, traces_sample_rate=1.0)

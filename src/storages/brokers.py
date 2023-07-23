@@ -1,6 +1,5 @@
 import asyncio
 import logging
-from abc import ABC, abstractmethod
 from typing import Any
 
 import msgpack
@@ -9,19 +8,17 @@ from aiokafka import AIOKafkaProducer
 from core.config import settings
 from core.logger import logger
 
+from .abc import BrokerABC
+
 logger()
 
-
-class StorageABC(ABC):
-    @abstractmethod
-    async def save(obj: dict[Any]):
-        ...
+# переименовать бы файл в brokers
 
 
-class KafkaStorage(StorageABC):
+class KafkaBroker(BrokerABC):
     @classmethod
     async def create(cls):
-        self = KafkaStorage()
+        self = KafkaBroker()
         self.producer = AIOKafkaProducer(
             bootstrap_servers=f"{settings.kafka_host}:{settings.kafka_port}",
             value_serializer=msgpack.dumps,
@@ -39,6 +36,6 @@ class KafkaStorage(StorageABC):
             return False
 
 
-def get_kafka_instance() -> KafkaStorage:
-    instance = asyncio.run(KafkaStorage.create())
+def get_kafka_instance() -> KafkaBroker:
+    instance = asyncio.run(KafkaBroker.create())
     return instance

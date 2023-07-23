@@ -1,3 +1,5 @@
+import os
+
 from pydantic import BaseSettings, Field
 
 
@@ -26,6 +28,7 @@ class Settings(BaseSettings):
     ch_table: str = Field("watching_movies", env="CLICKHOUSE_TABLE")
     ch_username: str = Field("movix", env="CLICKHOUSE_USERNAME")
     ch_password: str = Field("qwe123", env="CLICKHOUSE_PASSWORD")
+    sentry_dsn_ugc_etl: str = ""
 
     mongo_host: str = Field("localhost", env="MONGO_HOST")
     mongo_port: str = Field("27017", env="MONGO_PORT")
@@ -43,3 +46,13 @@ class Settings(BaseSettings):
     @property
     def redis_key_prefix(self):
         return f"{self.redis_base_key}:{self.topic}"
+
+    base_dir = os.path.dirname(os.path.dirname(__file__))
+
+
+settings = Settings()  # type: ignore
+
+if settings.sentry_dsn_ugc_etl:
+    import sentry_sdk  # type: ignore
+
+    sentry_sdk.init(dsn=settings.sentry_dsn_ugc_etl, traces_sample_rate=1.0)
