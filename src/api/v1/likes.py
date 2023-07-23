@@ -3,23 +3,23 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
-from models.likes import FilmAverageScore, FilmEditScore, FilmLikes
+from models import likes as model_likes
 from services.likes import LikeServiceABC, get_like_service
 
 router = APIRouter()
 
 
-@router.get("/film-likes/")
+@router.get("/film/likes/")
 async def get_likes(
     film_id: UUID, like_service: LikeServiceABC = Depends(get_like_service)
-) -> FilmLikes:
+) -> model_likes.FilmLikes:
     return await like_service.get_likes(film_id)
 
 
-@router.get("/film-average/")
+@router.get("/film/score/average/")
 async def get_average_score(
     film_id: UUID, like_service: LikeServiceABC = Depends(get_like_service)
-) -> FilmAverageScore:
+) -> model_likes.FilmAverageScore:
     average_score = await like_service.get_average_score_by_id(film_id)
     if not average_score:
         raise HTTPException(
@@ -28,27 +28,27 @@ async def get_average_score(
     return average_score
 
 
-@router.post("/movie-score/")
+@router.post("/film/score/")
 async def post_score(
     score: Annotated[int, Query(title="Score of how you liked the movie", ge=1, le=10)],
     film_id: UUID,
     user_id: UUID,
     like_service: LikeServiceABC = Depends(get_like_service),
-) -> FilmEditScore:
+) -> model_likes.FilmEditScore:
     return await like_service.insert_film_score(user_id, film_id, score)
 
 
-@router.patch("/movie-score/")
+@router.patch("/film/score/")
 async def edit_score(
     film_id: UUID,
     user_id: UUID,
     score: Annotated[int, Query(title="Score of how you liked the movie", ge=1, le=10)],
     like_service: LikeServiceABC = Depends(get_like_service),
-) -> FilmEditScore:
+) -> model_likes.FilmEditScore:
     return await like_service.insert_film_score(user_id, film_id, score)
 
 
-@router.delete("/movie-score/", response_model=None)
+@router.delete("/film/score/", response_model=None)
 async def delete_score(
     film_id: UUID,
     user_id: UUID,

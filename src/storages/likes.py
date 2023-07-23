@@ -27,10 +27,10 @@ class LikeStorage(StorageABC):
 
     async def get_count(self, film_id: UUID) -> FilmLikes:
         likes = await self.manager().get_count(
-            self.collection, {self.movie_id_field: film_id, self.score_field: 10}
+            self.collection, {self.movie_id_field: film_id, self.score_field: {"$gte": 6}}
         )
         dislikes = await self.manager().get_count(
-            self.collection, {self.movie_id_field: film_id, self.score_field: 0}
+            self.collection, {self.movie_id_field: film_id, self.score_field: {"$lt": 6}}
         )
         return FilmLikes(
             film_id=film_id, likes=likes.get("count"), dislikes=dislikes.get("count")

@@ -26,7 +26,7 @@ async def post_review(
     return await review_service.insert_review(user_id, film_id, text, score)
 
 
-@router.post("/review-score/")
+@router.post("/review/score/")
 async def post_review_score(
     user_id: UUID,
     review_id: UUID,

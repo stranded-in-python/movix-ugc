@@ -43,10 +43,6 @@ class MongoDBManagerABC(DBManager):
     async def get(self, *args, **kwargs):
         ...
 
-    # @abstractmethod
-    # async def search(self, *args, **kwargs) -> ObjectApiResponse[Any]:
-    #     ...
-
     @classmethod
     def get_instance(cls) -> MongoDBManagerABC | None:
         instance = super().get_instance()

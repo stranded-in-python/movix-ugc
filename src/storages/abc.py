@@ -22,11 +22,3 @@ class StorageABC(ABC):
     @abstractmethod
     async def delete(self, *args, **kwargs) -> None:
         ...
-
-    # @abstractmethod
-    # async def get_count(self, *args, **kwargs) -> None:
-    #     ...
-
-    # @abstractmethod
-    # async def get_average(self, *args, **kwargs) -> None:
-    #     ...
