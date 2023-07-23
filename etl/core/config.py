@@ -10,17 +10,18 @@ class ModelConfig:
 class Settings(BaseSettings):
     project_name: str = "movix-events"
 
-    view_event: str = "views"
-
     kafka_host: str = Field("localhost", env="KAFKA_HOST")
     kafka_port: str = Field("9092", env="KAFKA_PORT")
+
     redis_host: str = Field("localhost", env="REDIS_HOST")
     redis_port: int = Field(6379, env="REDIS_PORT")
     redis_base_key: str = Field("movix:ugc:etl", env="REDIS_BASE_KEY")
+
     group_id: str = Field("group_watching_movies", env="KAFKA_GROUP_ID")
     topic: str = Field("watching_movies", env="KAFKA_TOPIC")
     batch_timeout: int = Field(10, env="BATCH_TIMEOUT")  # in sec
     batch_size: int = Field(10, env="BATCH_SIZE")
+
     ch_host: str = Field("localhost", env="CLICKHOUSE_HOST")
     ch_port: int = Field(18123, env="CLICKHOUSE_PORT")
     ch_db: str = Field("movix_db", env="CLICKHOUSE_DATABASE")
@@ -28,6 +29,15 @@ class Settings(BaseSettings):
     ch_username: str = Field("movix", env="CLICKHOUSE_USERNAME")
     ch_password: str = Field("qwe123", env="CLICKHOUSE_PASSWORD")
     sentry_dsn_ugc_etl: str = ""
+
+    mongo_host: str = Field("localhost", env="MONGO_HOST")
+    mongo_port: str = Field("27017", env="MONGO_PORT")
+    mongo_user: str | None = Field(env="MONGO_USER")
+    mongo_password: str | None = Field(env="MONGO_PASSWORD")
+    mongo_db: str = Field("test", env="MONGO_DB")
+    mongo_rs: str | None = Field(env="MONGO_REPLICASET")
+    mongo_authdb: str = Field("test", env="MONGO_AUTHDB")
+    mongo_certpath: str | None = Field(env="MONGO_CERTPATH")
 
     @property
     def kafka_server(self):
@@ -40,9 +50,9 @@ class Settings(BaseSettings):
     base_dir = os.path.dirname(os.path.dirname(__file__))
 
 
-settings = Settings()
+settings = Settings()  # type: ignore
 
 if settings.sentry_dsn_ugc_etl:
-    import sentry_sdk
+    import sentry_sdk  # type: ignore
 
     sentry_sdk.init(dsn=settings.sentry_dsn_ugc_etl, traces_sample_rate=1.0)

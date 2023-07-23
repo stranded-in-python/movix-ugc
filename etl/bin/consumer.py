@@ -8,12 +8,10 @@ import clickhouse_connect
 import confluent_kafka
 import pendulum
 import storage
-from backoff import on_exception
 from clickhouse_connect.driver import Client
 from clickhouse_connect.driver.exceptions import ClickHouseError
 from clickhouse_connect.driver.tools import insert_file
-from logger import logger
-from utils import json_decoder
+from utils import json_decoder, logger, on_exception
 
 from core import Settings
 from models import Message
@@ -22,7 +20,9 @@ from models import Message
 class Executer:
     """Управление процессом ETL из Kafka в Clickhouse."""
 
-    def __init__(self, settings: Settings, offset_storage: storage.BaseStorage):
+    def __init__(
+        self, settings: Settings, offset_storage: storage.state.BaseOffsetStorage
+    ):
         self._settings = settings
         self._data_filename = 'data.csv'
         self._column_names = tuple(Message.__fields__.keys())
@@ -194,7 +194,7 @@ if __name__ == '__main__':
     settings = Settings()
     executer = Executer(
         settings=settings,
-        offset_storage=storage.RedisStorage(
+        offset_storage=storage.state.RedisOffsetStorage(
             settings.redis_key_prefix, settings.redis_host, settings.redis_port
         ),
     )

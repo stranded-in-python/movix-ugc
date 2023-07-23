@@ -1,6 +1,5 @@
 import redis
-from backoff import on_exception
-from logger import logger
+from utils import logger, on_exception
 
 from .base import BaseStorage
 
