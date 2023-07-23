@@ -2,7 +2,9 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
+from auth.users import get_current_user
 from models.bookmarks import Bookmark, ShortBookmark
+from models.models import User
 from services.bookmarks import BookmarkServiceABC, get_bookmark_service
 
 router = APIRouter()
@@ -12,6 +14,7 @@ router = APIRouter()
 async def post_bookmark(
     user_id: UUID,
     film_id: UUID,
+    user_creds: User, user=Depends(get_current_user),
     bookmark_service: BookmarkServiceABC = Depends(get_bookmark_service),
 ) -> Bookmark:
     return await bookmark_service.insert_bookmark(user_id, film_id)
@@ -21,6 +24,7 @@ async def post_bookmark(
 async def delete_bookmark(
     film_id: UUID,
     user_id: UUID,
+    user_creds: User, user=Depends(get_current_user),
     bookmark_service: BookmarkServiceABC = Depends(get_bookmark_service),
 ) -> Response(status_code=status.HTTP_200_OK):
     await bookmark_service.delete_bookmark(user_id, film_id)
@@ -29,7 +33,7 @@ async def delete_bookmark(
 
 @router.get("/bookmarks/", response_model=None)
 async def get_bookmarks(
-    user_id: UUID, bookmark_service: BookmarkServiceABC = Depends(get_bookmark_service)
+    user_id: UUID, user_creds: User, user=Depends(get_current_user), bookmark_service: BookmarkServiceABC = Depends(get_bookmark_service)
 ) -> list[ShortBookmark]:
     bookmarks = await bookmark_service.get_bookmarks(user_id)
     if not bookmarks:
