@@ -18,8 +18,8 @@ Fastapi, Kafka, ClickHouse, MongoDB
 
 ClickHouse was chosen as distributed storage due to its perfomance in synthetic tests. Other options included Vertica and Greenplum.
 
-To launch benchmarks: 
-* cd /benchmark 
+To launch benchmarks:
+* cd /benchmark
 * choose and cd to folder with a db you are intested in
 * In the root of db folder: docker compose -f up -d --build
 * While waiting for containters to launch install requirements at requirements/local.txt in the root of db folder
