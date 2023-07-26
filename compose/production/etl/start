@@ -4,4 +4,4 @@ set -o errexit
 set -o pipefail
 set -o nounset
 
-/usr/local/bin/python /app/consumer.py
+/usr/local/bin/python /app/bin/start.py

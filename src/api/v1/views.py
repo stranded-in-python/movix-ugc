@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from managers.users import get_current_user
-from managers.views import ViewSerializerManager, get_view_manager
-from models.models import BasicViewEvent, UserViewEvent
+from auth.users import get_current_user
+from broker_managers.views import ViewSerializerManager, get_view_manager
+from models.models import UserViewEvent
 
 router = APIRouter()
 
 
 @router.post(
     "/view",
-    response_model=BasicViewEvent,
+    response_model=UserViewEvent,
     summary="View event",
     description="Post view event",
     response_description="id, user_id, film_id, view's timestamp, frame of a movie",
@@ -24,7 +24,7 @@ async def save_view(
     event: UserViewEvent,
     user=Depends(get_current_user),
     view_manager: ViewSerializerManager = Depends(get_view_manager),
-) -> BasicViewEvent:
+) -> UserViewEvent:
     if not await view_manager.save_to_storage(event):
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Broker timed out."
