@@ -1,13 +1,9 @@
-from asgi_correlation_id import CorrelationIdMiddleware
-from ddtrace.contrib.asgi.middleware import TraceMiddleware
-import structlog
-
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
 from api.v1 import views
+# from api.v1 import bookmarks, likes, reviews, views # хз где эти модули
 from core.config import settings
-from core.logger import logging_middleware as _logging_middleware
 
 app = FastAPI(
     title=settings.project_name,
@@ -16,21 +12,7 @@ app = FastAPI(
     default_response_class=ORJSONResponse,
 )
 
-@app.middleware("http")
-async def logging_middleware(request: Request, call_next) -> Response:
-    await _logging_middleware(request, call_next)
-
-app.add_middleware(CorrelationIdMiddleware)
-
-tracing_middleware = next(
-    (m for m in app.user_middleware if m.cls == TraceMiddleware), None
-)
-if tracing_middleware is not None:
-    app.user_middleware = [m for m in app.user_middleware if m.cls != TraceMiddleware]
-    structlog.stdlib.get_logger("api.datadog_patch").info(
-        "Patching Datadog tracing middleware to be the outermost middleware..."
-    )
-    app.user_middleware.insert(0, tracing_middleware)
-    app.middleware_stack = app.build_middleware_stack()
-
 app.include_router(views.router, prefix="/api/v1/ugc/events", tags=["Views"])
+# app.include_router(likes.router, prefix="/api/v1/ugc", tags=["Likes/Score"])
+# app.include_router(bookmarks.router, prefix="/api/v1/ugc", tags=["Bookmarks"])
+# app.include_router(reviews.router, prefix="/api/v1/ugc", tags=["Reviews"])
