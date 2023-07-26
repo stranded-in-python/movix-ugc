@@ -9,7 +9,7 @@ from core.config import settings
 
 LOG_FORMAT = "%(asctime)s:%(name)s:%(levelname)s:%(module)s:%(funcName)s:%(message)s"
 LOG_DEFAULT_HANDLERS = ["console", "file"]
-LOG_DIR = f"{settings.base_dir}/logs"
+LOG_DIR = f"/var/log/{settings.project_name}"
 LOG_LEVEL = "DEBUG"
 
 
