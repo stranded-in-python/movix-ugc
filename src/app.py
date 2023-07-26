@@ -2,8 +2,13 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
 from api.v1 import views
-# from api.v1 import bookmarks, likes, reviews, views # хз где эти модули
+
+from api.v1 import bookmarks, likes, reviews, views
 from core.config import settings
+from core.logger import logger
+
+
+logger()
 
 app = FastAPI(
     title=settings.project_name,
@@ -13,6 +18,6 @@ app = FastAPI(
 )
 
 app.include_router(views.router, prefix="/api/v1/ugc/events", tags=["Views"])
-# app.include_router(likes.router, prefix="/api/v1/ugc", tags=["Likes/Score"])
-# app.include_router(bookmarks.router, prefix="/api/v1/ugc", tags=["Bookmarks"])
-# app.include_router(reviews.router, prefix="/api/v1/ugc", tags=["Reviews"])
+app.include_router(likes.router, prefix="/api/v1/ugc", tags=["Likes/Score"])
+app.include_router(bookmarks.router, prefix="/api/v1/ugc", tags=["Bookmarks"])
+app.include_router(reviews.router, prefix="/api/v1/ugc", tags=["Reviews"])
