@@ -41,12 +41,20 @@ class MongoDBManager(MongoDBManagerABC):
         )
 
     async def get_and_sort(
-        self, collection: str, sort_field: str, order: int, *args
+        self,
+        collection: str,
+        sort_field: str,
+        order: int,
+        page_number: int,
+        page_size: int,
+        *args,
     ) -> list[dict[str, Any]] | None:
         return (
             await self.get_client()[settings.mongo_db_name][collection]
             .find(*args)
             .sort(sort_field, order)
+            .skip(page_number)
+            .limit(page_size)
             .to_list(length=None)
         )
 

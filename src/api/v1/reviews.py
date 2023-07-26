@@ -4,6 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from auth.users import get_current_user
+from core.pagination import PaginateQueryParams
 from core.predefined import LikeDislike
 from models.reviews import Review, ReviewLikes
 from services.reviews import ReviewServiceABC, get_review_service
@@ -72,9 +73,10 @@ async def get_reviews(
     film_id: UUID,
     sort: str | None = None,
     user=Depends(get_current_user),
+    pagination: PaginateQueryParams = Depends(PaginateQueryParams),
     review_service: ReviewServiceABC = Depends(get_review_service),
 ) -> list[Review]:
-    reviews = await review_service.get_reviews(film_id, sort)
+    reviews = await review_service.get_reviews(film_id, sort, pagination)
     if not reviews:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Reviews not found."

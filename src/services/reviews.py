@@ -1,6 +1,7 @@
 from functools import lru_cache
 from uuid import UUID
 
+from core.pagination import PaginateQueryParams
 from managers.mongodb import get_mongo_manager
 from models.reviews import Review, ReviewLikes
 from storages.abc import StorageABC
@@ -23,8 +24,10 @@ class ReviewService(ReviewServiceABC):
     ) -> ReviewLikes:
         return await self.storage.insert_review_score(user_id, review_id, score)
 
-    async def get_reviews(self, film_id: UUID, sort: str | None) -> list[Review] | None:
-        return await self.storage.get_sorted_reviews(film_id, sort)
+    async def get_reviews(
+        self, film_id: UUID, sort: str | None, pagination: PaginateQueryParams | None
+    ) -> list[Review] | None:
+        return await self.storage.get_sorted_reviews(film_id, sort, pagination)
 
 
 @lru_cache
