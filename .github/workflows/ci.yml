@@ -67,12 +67,12 @@ jobs:
           file: "./compose/production/api/Dockerfile"
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            ghcr.io/stranded-in-python/movix-ugc:latest
+            ghcr.io/stranded-in-python/movix-ugc-api:latest
 
           labels: |
             maintainer=${{ github.actor }}
 
-  builder-etl:
+  builder-bookmarks:
     environment: production
     runs-on: ubuntu-latest
     if: ${{ github.event_name != 'pull_request' }}
@@ -93,10 +93,128 @@ jobs:
       - name: Build ETL service
         uses: docker/build-push-action@v4
         with:
-          file: "./compose/production/etl/Dockerfile"
+          file: "./compose/production/etl/bookmarks/Dockerfile"
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            ghcr.io/stranded-in-python/movix-ugc:latest
+            ghcr.io/stranded-in-python/movix-ugc-etl-bookmarks:latest
+
+          labels: |
+            maintainer=${{ github.actor }}
+
+  builder-likes-movies:
+    environment: production
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' }}
+    needs:
+      - linter
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Login to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.TOKEN }}
+
+      - name: Build ETL service
+        uses: docker/build-push-action@v4
+        with:
+          file: "./compose/production/etl/likes_movies/Dockerfile"
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ghcr.io/stranded-in-python/movix-ugc-etl-likes-movies:latest
+
+          labels: |
+            maintainer=${{ github.actor }}
+
+  builder-likes-reviews:
+    environment: production
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' }}
+    needs:
+      - linter
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Login to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.TOKEN }}
+
+      - name: Build ETL service
+        uses: docker/build-push-action@v4
+        with:
+          file: "./compose/production/etl/likes_reviews/Dockerfile"
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ghcr.io/stranded-in-python/movix-ugc-etl-likes-reviews:latest
+
+          labels: |
+            maintainer=${{ github.actor }}
+            
+
+  builder-reviews:
+    environment: production
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' }}
+    needs:
+      - linter
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Login to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.TOKEN }}
+
+      - name: Build ETL service
+        uses: docker/build-push-action@v4
+        with:
+          file: "./compose/production/etl/reviews/Dockerfile"
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ghcr.io/stranded-in-python/movix-ugc-etl-reviews:latest
+
+          labels: |
+            maintainer=${{ github.actor }}
+
+
+  builder-watching:
+    environment: production
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' }}
+    needs:
+      - linter
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Login to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.TOKEN }}
+
+      - name: Build ETL service
+        uses: docker/build-push-action@v4
+        with:
+          file: "./compose/production/etl/watching/Dockerfile"
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ghcr.io/stranded-in-python/movix-ugc-etl-watching:latest
 
           labels: |
             maintainer=${{ github.actor }}
