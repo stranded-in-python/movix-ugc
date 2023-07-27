@@ -42,7 +42,7 @@ class BookmarkServiceABC(ABC):
         ...
 
     @abstractmethod
-    async def get_bookmarks(self, user_id: UUID) -> list[ShortBookmark]:
+    async def get_bookmarks(self, user_id: UUID) -> list[ShortBookmark] | None:
         ...
 
 
@@ -60,5 +60,5 @@ class ReviewServiceABC(ABC):
         ...
 
     @abstractmethod
-    async def get_reviews(self):
+    async def get_reviews(self) -> list[Review] | None:
         ...

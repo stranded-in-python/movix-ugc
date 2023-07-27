@@ -4,6 +4,7 @@ from uuid import UUID, uuid4
 
 import pymongo
 
+from core.pagination import PaginateQueryParams
 from managers.mongodb import MongoDBManager
 from models.reviews import Review, ReviewLikes
 
@@ -24,7 +25,7 @@ class ReviewStorage(StorageABC):
         self.user_id_field = 'user_id'
         self.review_id_field = 'review_id'
 
-    def _sort_2_order(self, sort: str | None):
+    def _sort_2_order(self, sort: str | None) -> tuple(str, int):
         if not sort:
             return self.review_id_field, pymongo.ASCENDING
 
@@ -35,6 +36,18 @@ class ReviewStorage(StorageABC):
                 return sort[1:], pymongo.DESCENDING
             case _:
                 return self.review_id_field, pymongo.ASCENDING
+
+    def _pagination_2_query_args(
+        self, pagination: None | PaginateQueryParams
+    ) -> tuple(int, int):
+        if not pagination:
+            return 0, 50
+        return (
+            (pagination.page_number - 1) * pagination.page_size
+            if pagination.page_number > 0
+            else 0,
+            pagination.page_size,
+        )
 
     async def get(self, *args) -> list[Review] | None:
         reviews: list | None = await self.manager().get(*args)
@@ -94,11 +107,17 @@ class ReviewStorage(StorageABC):
         return ReviewLikes(user_id=user_id, review_id=review_id, score=score)
 
     async def get_sorted_reviews(
-        self, film_id: UUID, sort: str | None
+        self, film_id: UUID, sort: str | None, pagination: PaginateQueryParams
     ) -> list[Review] | None:
         sort_field, order = self._sort_2_order(sort)
+        page_number, page_size = self._pagination_2_query_args()
         reviews = await self.manager().get_and_sort(
-            self.review_collection, sort_field, order, {self.movie_id_field: film_id}
+            self.review_collection,
+            sort_field,
+            order,
+            page_number,
+            page_size,
+            {self.movie_id_field: film_id},
         )
         if not reviews:
             return None
